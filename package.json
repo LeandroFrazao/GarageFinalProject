@@ -1,0 +1,39 @@
+{
+  "name": "garagefinalproject",
+  "version": "1.0.0",
+  "description": "Final Project CCT",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeandroFrazao/GarageFinalProject.git"
+  },
+  "keywords": [
+    "Final",
+    "Project",
+    "CCT"
+  ],
+  "author": "Leandro Frazao",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LeandroFrazao/GarageFinalProject/issues"
+  },
+  "homepage": "https://github.com/LeandroFrazao/GarageFinalProject#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "crypto": "^1.0.1",
+    "express": "^4.17.1",
+    "express-validator": "^6.8.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.3",
+    "nodemailer": "^6.4.17"
+  }
+}
