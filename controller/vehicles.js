@@ -27,8 +27,8 @@ module.exports = () => {
   ////Get all issues for a project "{GET} /vehicles/{email}"///////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
   const getVehicleByEmailController = async (req, res) => {
-    const slug = req.params.slug;
-    const { result, error } = await vehicles.getVehiclesByUser(slug);
+    const email = req.params.email;
+    const { result, error } = await vehicles.getVehiclesByUser(email);
     if (error) {
       return res.status(500).json({ error });
     }
@@ -39,17 +39,19 @@ module.exports = () => {
   /////Add new vehicles to an user individually "{POST} /vehicle"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
   const postController = async (req, res) => {
-    const slug = req.params.slug;
-    const title = req.body.title;
-    const description = req.body.description;
-    const status = req.body.status;
-    const dueDate = req.body.dueDate;
+    const vin = req.params.vin;
+    const model = req.body.model;
+    const type = req.body.type;
+    const make = req.body.make;
+    const engine = req.body.engine;
+    const year = req.body.year;
     const { result, error } = await vehicles.add(
-      slug,
-      title,
-      description,
-      status,
-      dueDate
+      vin,
+      model,
+      type,
+      make,
+      engine,
+      year
     );
     if (error) {
       return res.status(500).json({ error });

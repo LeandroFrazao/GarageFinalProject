@@ -5,56 +5,44 @@ module.exports = () => {
   ////Get all services "{GET} /services"///////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   const getController = async (req, res) => {
-    const { result, error } = await vehicles.get();
+    const { result, error } = await services.get();
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ vehicles: result });
+    res.json({ services: result });
   };
 
   ////////////////////////////////////////////////////////////////////////////////
   ////Get individual services "{GET} /services/{:VIN}" or {_id}//////////////
   //////////////////////////////////////////////////////////////////////////////
   const getByIdController = async (req, res) => {
-    const { result, error } = await vehicles.get(req.params.id);
+    const { result, error } = await services.get(req.params.id);
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ vehicles: result });
-  };
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////
-  ////Get all issues for a project "{GET} /vehicles/{email}"///////////////////////
-  /////////////////////////////////////////////////////////////////////////////////////////////
-  const getVehicleByEmailController = async (req, res) => {
-    const slug = req.params.slug;
-    const { result, error } = await vehicles.getVehiclesByUser(slug);
-    if (error) {
-      return res.status(500).json({ error });
-    }
-    res.json({ vehicles: result });
+    res.json({ services: result });
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
-  /////Add new vehicles to an user individually "{POST} /vehicle"////////////
+  /////Add new service to an user individually "{POST} /services"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
   const postController = async (req, res) => {
-    const slug = req.params.slug;
-    const title = req.body.title;
-    const description = req.body.description;
+    const vin = req.params.vin;
     const status = req.body.status;
-    const dueDate = req.body.dueDate;
-    const { result, error } = await vehicles.add(
-      slug,
-      title,
-      description,
+    const description = req.body.description;
+    const staff = req.body.staff;
+    const service = req.body.service;
+    const { result, error } = await services.add(
+      vin,
       status,
-      dueDate
+      description,
+      staff,
+      service
     );
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ vehicles: result });
+    res.json({ services: result });
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +50,6 @@ module.exports = () => {
   return {
     getController,
     getByIdController,
-    getVehicleByEmailController,
     postController,
   };
 };

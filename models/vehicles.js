@@ -1,6 +1,6 @@
 const db = require("../db")();
 const COLLECTION = "vehicles";
-const auth = require("../user/auth");
+const auth = require("../userlogin/auth");
 const ObjectID = require("mongodb").ObjectID;
 
 module.exports = () => {
@@ -91,7 +91,7 @@ module.exports = () => {
     try {
       const authorEmail = auth.currentUser.userEmail; //whoever is logged is going to record automatically the email of the current user
       vin = vin.toUpperCase();
-      let project = null;
+      let vehicle = null;
       vehicle = await db.get("vehicles", { vin: vin });
       if (vehicle.length != 0) {
         if (vehicle[0].email == authorEmail) {
@@ -103,7 +103,6 @@ module.exports = () => {
       const results = await db.add(COLLECTION, {
         email: authorEmail,
         vin: vin,
-
         type: type,
         make: make,
         model: model,
