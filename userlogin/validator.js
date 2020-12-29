@@ -40,7 +40,7 @@ exports.validateUser = [
     .withMessage("Key must be at least 5 characters long"),
   checkValidation,
 ];
-exports.validateProject = [
+exports.validateInvoice = [
   check("slug")
     .notEmpty()
     .withMessage("Slug cannot be blank")
@@ -58,7 +58,7 @@ exports.validateProject = [
     .withMessage("Description must be at least 10 characters long."),
   checkValidation,
 ];
-exports.validateIssues = [
+exports.validateService = [
   check("title")
     .notEmpty()
     .withMessage("Title cannot be blank")
@@ -85,7 +85,7 @@ exports.validateIssues = [
     .withMessage("dueDate must be a valid date YYYY-MM-DD"),
   checkValidation,
 ];
-exports.validateComments = [
+exports.validateItem = [
   check("text")
     .notEmpty()
     .withMessage("Text cannot be blank")

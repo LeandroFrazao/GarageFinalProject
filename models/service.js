@@ -1,5 +1,5 @@
 const db = require("../db")();
-const COLLECTION = "services";
+const COLLECTION = "service";
 const auth = require("../userlogin/auth");
 const ObjectID = require("mongodb").ObjectID;
 
@@ -10,30 +10,30 @@ module.exports = () => {
   ////Get individual service "{GET} /services/{:vin}" or {_id}//////////////
   //////////////////////////////////////////////////////////////////////////////
   const get = async (id = null) => {
-    // find document or using VIN(vehicle id number) or _id
+    // find document or using serviceId or _id
     console.log(" --- servicesModel.get --- ");
-    let vehicles = null;
+    let services = null;
     try {
       if (!id) {
-        vehicles = await db.get(COLLECTION);
-        if (!vehicles[0]) {
+        services = await db.get(COLLECTION);
+        if (!services[0]) {
           error = "There are no services Registered";
           return { error: error };
         }
       } else {
-        // if user use service _id instead of vin,
-        const vin = id.toUpperCase();
+        // if user use service _id ,
+        const serviceId = id.toUpperCase();
         if (ObjectID.isValid(id)) {
           console.log(id);
           //check if object is valid
-          PIPELINE_ID_OBJECT_OR_VIN = {
+          PIPELINE_ID_OBJECT_OR_SERVICEID = {
             //if objectID(id) is valid, so the query is going to try to find BOTH _id or VIN
-            $or: [{ _id: ObjectID(id) }, { vin: vin }],
+            $or: [{ _id: ObjectID(id) }, { serviceId: serviceId }],
           };
-          services = await db.get(COLLECTION, PIPELINE_ID_OBJECT_OR_VIN);
+          services = await db.get(COLLECTION, PIPELINE_ID_OBJECT_OR_SERVICEID);
         } else {
           //or use query to find VIN from mongodb
-          services = await db.get(COLLECTION, { vin: vin });
+          services = await db.get(COLLECTION, { serviceId: serviceId });
         }
         if (!services[0]) {
           // if query returns undefined means that there's no vehicle registered
@@ -59,7 +59,19 @@ module.exports = () => {
       const date = new Date();
       const date_in =
         date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+      let serviceId =
+        vin + "_" + date.getDate() + (date.getMonth() + 1) + date.getFullYear();
+
+      //check if serviceId was already registered
+      const services = await db.get(COLLECTION, { serviceId: serviceId });
+
+      if (services.length > 0) {
+        error = "Service (" + serviceId + ") is already registered.";
+        return { error: error };
+      }
+
       const results = await db.add(COLLECTION, {
+        serviceId: serviceId,
         vin: vin,
         status: status,
         description: description,
@@ -72,9 +84,31 @@ module.exports = () => {
       return { error: error };
     }
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Updated the status of a service "{PUT} /service/{serviceId}/{STATUS}"  ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const putUpdateStatus = async (serviceId, status) => {
+    console.log(" --- serviceModel.putUpdateStatus --- ");
+    try {
+      serviceId = serviceId.toUpperCase();
+
+      let service = null;
+      service = await db.get(COLLECTION, { serviceId: serviceId });
+      if (!service[0]) {
+        error = "Service ID (" + serviceId + ") NOT FOUND!";
+        return { error: error };
+      }
+      const newValue = { $set: { status: status } };
+      const services = await db.update(COLLECTION, { serviceId }, newValue);
+      return { result: services };
+    } catch (error) {
+      return { error: error };
+    }
+  };
 
   return {
     get,
     add,
+    putUpdateStatus,
   };
 };

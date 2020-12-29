@@ -18,6 +18,9 @@ const hostname = "0.0.0.0";
 const port = process.env.PORT || 3000;
 
 const usersController = require("./controller/users")();
+const vehiclesController = require("./controller/vehicles")();
+const serviceController = require("./controller/service")();
+const invoiceController = require("./controller/invoice")();
 
 const cookieParser = require("cookie-parser");
 const app = express();
@@ -87,6 +90,55 @@ app.post(
 );
 //------------> get a user by email or user _id
 app.get("/users/:id", auth, accessLevel, usersController.getById);
+
+//////////////////////////////////////////////////////////////////////////////////
+/////         vehicles                                           ////////////////
+////////////////////////////////////////////////////////////////////////////////
+//------------> get all users
+app.get("/vehicles", auth, vehiclesController.getController);
+//------------> add an user
+app.post("/vehicles", auth, validateUser, vehiclesController.postController);
+//------------> get a user by VIN
+app.get("/vehicles/:id", auth, vehiclesController.getByIdController);
+//------------> get a user by email or user _id
+app.get(
+  "/users/:email/vehicles",
+  auth,
+  vehiclesController.getVehicleByEmailController
+);
+
+//////////////////////////////////////////////////////////////////////////////////
+/////         service                                            ////////////////
+////////////////////////////////////////////////////////////////////////////////
+//------------> get all services
+app.get("/service", auth, serviceController.getController);
+//------------> add an service
+app.post("/service", auth, validateUser, serviceController.postController);
+//------------> get a service by serviceId
+app.get("/service/:id", auth, serviceController.getByIdController);
+//------------> change status of service
+app.put(
+  "/service/:serviceId/:status",
+  auth,
+  serviceController.putUpdateStatusController
+);
+//////////////////////////////////////////////////////////////////////////////////
+/////         invoice                                            ////////////////
+////////////////////////////////////////////////////////////////////////////////
+//------------> get all invoices
+app.get("/invoice", auth, invoiceController.getController);
+//------------> add an invoice
+app.post("/invoice", auth, validateUser, invoiceController.postController);
+//------------> get an invoice by invoiceId
+app.get("/invoice/:id", auth, invoiceController.getByIdController);
+//------------> add items
+app.post("/invoice/:invoiceId", auth, invoiceController.postItemController);
+//------------> delete items
+app.delete(
+  "/invoice/:invoiceId/:itemId",
+  auth,
+  invoiceController.deleteItemController
+);
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);

@@ -55,41 +55,44 @@ module.exports = () => {
     console.log(" --- vehiclesModel.getIssuesByProject --- ");
     try {
       email = email.toLowerCase();
+
       const PIPELINE_EMAIL_VEHICLES = [
         {
           $lookup: {
             from: "vehicles",
             localField: "email",
             foreignField: "email",
-            as: "user",
+            as: "vehicles",
           },
         },
         { $match: { email: email } },
       ];
 
-      const vehicles = await db.aggregate("vehicles", PIPELINE_EMAIL_VEHICLES);
-      if (!vehicles[0]) {
+      const users = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
+      console.log(users[0]);
+      if (!users[0]) {
         error = "Email (" + email + ") NOT FOUND!";
         return { error: error };
       }
-      if (vehicles[0].issue.length == 0) {
-        error = "vehicles for email (" + slug + ") NOT FOUND!";
+      if (users[0].vehicles.length == 0) {
+        error = "vehicles for email (" + email + ") NOT FOUND!";
         return { error: error };
       }
-      return { result: vehicles };
+      return { result: users };
     } catch (error) {
       return { error: error };
     }
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
-  /////Add new vehicles to user individually "{POST} /vehicle"////////////
+  /////Add new vehicles to user individually "{POST} /vehicles"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
   const add = async (vin, type, make, model, engine, year) => {
     console.log(" --- vehiclesModel.add --- ");
 
     try {
       const authorEmail = auth.currentUser.userEmail; //whoever is logged is going to record automatically the email of the current user
+
       vin = vin.toUpperCase();
       let vehicle = null;
       vehicle = await db.get("vehicles", { vin: vin });
@@ -109,6 +112,7 @@ module.exports = () => {
         engine: engine,
         year: year,
       });
+
       return { result: results.result };
     } catch (error) {
       return { error: error };

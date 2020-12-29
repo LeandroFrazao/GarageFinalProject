@@ -1,11 +1,11 @@
-const services = require("../models/service")();
+const parts = require("../models/parts")();
 
 module.exports = () => {
   //////////////////////////////////////////////////////////////////////////////////
-  ////Get all services "{GET} /services"///////////////////////////////////////////////
+  ////Get all parts "{GET} /parts"///////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   const getController = async (req, res) => {
-    const { result, error } = await services.get();
+    const { result, error } = await parts.get();
     if (error) {
       return res.status(500).json({ error });
     }
@@ -13,55 +13,55 @@ module.exports = () => {
   };
 
   ////////////////////////////////////////////////////////////////////////////////
-  ////Get individual services "{GET} /services/{:VIN}" or {_id}//////////////
+  ////Get individual part "{GET} /parts/{:slug}" or {_id}//////////////
   //////////////////////////////////////////////////////////////////////////////
   const getByIdController = async (req, res) => {
-    const { result, error } = await services.get(req.params.id);
+    const { result, error } = await parts.get(req.params.id);
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ services: result });
+    res.json({ parts: result });
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
-  /////Add new service to an user individually "{POST} /services"////////////
+  /////Add new parts  "{POST} /services"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
   const postController = async (req, res) => {
-    const vin = req.body.vin;
-    const status = req.body.status;
-    const description = req.body.description;
-    const staff = req.body.staff;
-    const service = req.body.service;
-    const { result, error } = await services.add(
-      vin,
-      status,
-      description,
-      staff,
-      service
+    const name = req.body.name;
+    const cost = req.body.cost;
+    const category = req.body.category;
+    const make = req.body.make;
+    const model = req.body.model;
+    const { result, error } = await parts.add(
+      name,
+      cost,
+      category,
+      make,
+      model
     );
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ services: result });
+    res.json({ parts: result });
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Updated the status of a service "{PUT} /service/{serviceId}/{STATUS}"                          ///
+  ////Updated the cost of a part "{PUT} /parts/{slug}"                          ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const putUpdateStatusController = async (req, res) => {
-    const serviceId = req.params.serviceId;
-    const status = req.params.status;
-    const { result, error } = await services.putUpdateStatus(serviceId, status);
+  const putUpdateCostController = async (req, res) => {
+    const slug = req.params.slug;
+    const cost = req.body.cost;
+    const { result, error } = await parts.putUpdateStatus(slug, cost);
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ services: result });
+    res.json({ parts: result });
   };
 
   return {
     getController,
     getByIdController,
     postController,
-    putUpdateStatusController,
+    putUpdateCostController,
   };
 };

@@ -24,7 +24,7 @@ module.exports = () => {
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
-  ////Get all issues for a project "{GET} /vehicles/{email}"///////////////////////
+  ////Get all vehicles for an user "{GET} /users/{email}/vehicles"///////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
   const getVehicleByEmailController = async (req, res) => {
     const email = req.params.email;
@@ -32,14 +32,14 @@ module.exports = () => {
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ vehicles: result });
+    res.json({ users: result });
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new vehicles to an user individually "{POST} /vehicle"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
   const postController = async (req, res) => {
-    const vin = req.params.vin;
+    const vin = req.body.vin;
     const model = req.body.model;
     const type = req.body.type;
     const make = req.body.make;
