@@ -48,9 +48,22 @@ module.exports = () => {
     res.json({ users: result });
   };
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete user "{DELETE} /users/{email}"                                                      ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteController = async (req, res) => {
+    const id = req.params.email;
+    const { result, error } = await users.deleteUser(id);
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ results: result });
+  };
+
   return {
     getController,
     postController,
     getById,
+    deleteController,
   };
 };

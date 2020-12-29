@@ -58,10 +58,23 @@ module.exports = () => {
     res.json({ services: result });
   };
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete service "{DELETE} /service/{serviceId}"                                                      ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteController = async (req, res) => {
+    const id = req.params.serviceId;
+    const { result, error } = await services.deleteService(id);
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ results: result });
+  };
+
   return {
     getController,
     getByIdController,
     postController,
     putUpdateStatusController,
+    deleteController,
   };
 };

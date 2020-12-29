@@ -98,9 +98,36 @@ module.exports = () => {
         error = "Service ID (" + serviceId + ") NOT FOUND!";
         return { error: error };
       }
-      const newValue = { $set: { status: status } };
+
+      const newValue = {
+        $set: {
+          status: status,
+        },
+      };
       const services = await db.update(COLLECTION, { serviceId }, newValue);
       return { result: services };
+    } catch (error) {
+      return { error: error };
+    }
+  };
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete service "{DELETE} /service/{serviceId}"  ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteService = async (id) => {
+    console.log(" --- serviceModel.delete --- ");
+    try {
+      id = id.toUpperCase();
+
+      let collection = null;
+      collection = await db.get(COLLECTION, { serviceId: id });
+      if (!collection[0]) {
+        error = "Service (" + id + ") NOT FOUND!";
+        return { error: error };
+      }
+      const results = await db.deleteOne(COLLECTION, { serviceId: id });
+      console.log("Service " + id + " DELETED");
+      return { result: results };
     } catch (error) {
       return { error: error };
     }
@@ -110,5 +137,6 @@ module.exports = () => {
     get,
     add,
     putUpdateStatus,
+    deleteService,
   };
 };

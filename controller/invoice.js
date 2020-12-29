@@ -72,6 +72,17 @@ module.exports = () => {
     }
     res.json({ invoices: result });
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete invoice "{DELETE} /invoice/{invoiceId}"                                                      ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteController = async (req, res) => {
+    const id = req.params.invoiceId;
+    const { result, error } = await invoices.deleteInvoice(id);
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ results: result });
+  };
 
   return {
     getController,
@@ -80,5 +91,6 @@ module.exports = () => {
     postController,
     postItemController,
     deleteItemController,
+    deleteController,
   };
 };

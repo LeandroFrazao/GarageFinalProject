@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const db = require("../db")();
 const userHashKey = require("./hash")();
 const crypto = require("crypto");
+import { Request, Response } from "express";
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 //\\                       LOGIN                                            \\\\\\\\\\\\\\\\\\\
@@ -70,4 +71,20 @@ exports.login = async (req, res, next) => {
       res.status(500).json({ error: error });
     }
   }
+};
+
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//\\                       LOGOUT                                            \\\\\\\\\\\\\\\\\\\
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+exports.logout = async (req, res) => {
+  res.cookie("jwt", "", {
+    expires: new Date(0),
+    path: "/",
+  });
+
+  res.send("Logout successful");
+};
+
+export const logOut = (req: Request, res: Response) => {
+  new Promise((resolve, reject) => {});
 };

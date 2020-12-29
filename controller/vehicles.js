@@ -59,12 +59,23 @@ module.exports = () => {
     res.json({ vehicles: result });
   };
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete vehicle "{DELETE} /vehicles/{vin}"                                                      ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteController = async (req, res) => {
+    const id = req.params.vin;
+    const { result, error } = await vehicles.deleteVehicle(id);
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ results: result });
+  };
 
   return {
     getController,
     getByIdController,
     getVehicleByEmailController,
     postController,
+    deleteController,
   };
 };

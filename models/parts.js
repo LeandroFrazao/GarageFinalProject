@@ -54,7 +54,7 @@ module.exports = () => {
     console.log(" --- partsModel.add --- ");
 
     try {
-      let slug = category.substr(0, 2) + make.substr(0, 3) + "-" + model;
+      let slug = category.substr(0, 4) + make.substr(0, 4) + "-" + model;
       slug = slug.toLocaleUpperCase();
       //check if serviceId was already registered
       const parts = await db.get(COLLECTION, { slug: slug });
@@ -66,10 +66,11 @@ module.exports = () => {
 
       const results = await db.add(COLLECTION, {
         slug: slug,
-        name: name,
+        partName: name,
         cost: cost,
         make: make,
         model: model,
+        category: category,
       });
       return { result: results.result };
     } catch (error) {
@@ -80,7 +81,7 @@ module.exports = () => {
   ////Updated cost of a part "{PUT} /parts/{slug}"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const putUpdateCost = async (slug, cost) => {
-    console.log(" --- serviceModel.putUpdateStatus --- ");
+    console.log(" --- partsModel.putUpdateCost --- ");
     try {
       slug = slug.toUpperCase();
 
@@ -97,10 +98,32 @@ module.exports = () => {
       return { error: error };
     }
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete part "{DELETE} /parts/{slug}"  ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deletePart = async (slug) => {
+    console.log(" --- partsModel.delete --- ");
+    try {
+      slug = slug.toUpperCase();
+
+      let part = null;
+      part = await db.get(COLLECTION, { slug: slug });
+      if (!part[0]) {
+        error = "Part (" + slug + ") NOT FOUND!";
+        return { error: error };
+      }
+      const parts = await db.deleteOne(COLLECTION, { slug: slug });
+      console.log("Part " + slug + " DELETED");
+      return { result: parts };
+    } catch (error) {
+      return { error: error };
+    }
+  };
 
   return {
     get,
     add,
     putUpdateCost,
+    deletePart,
   };
 };

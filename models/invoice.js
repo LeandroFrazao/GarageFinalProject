@@ -91,12 +91,15 @@ module.exports = () => {
     try {
       const authorEmail = auth.currentUser.userEmail; //whoever is logged is going to record automatically the email of the current user
       serviceId = serviceId.toUpperCase();
-      let invoiceId = null;
+      const date = new Date();
+      const date_out =
+        date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
       const count = await db.count(COLLECTION);
       const results = await db.add(COLLECTION, {
         invoiceId: count + 1,
         email: authorEmail,
         serviceId: serviceId,
+        date_out: date_out,
         items: [],
       });
       return { result: results.result };
@@ -189,6 +192,27 @@ module.exports = () => {
       return { error: error };
     }
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete invoice "{DELETE} /invoice/{invoiceId}"  ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteInvoice = async (id) => {
+    console.log(" --- invoicesModel.delete --- ");
+    try {
+      id = id.toUpperCase();
+
+      let collection = null;
+      collection = await db.get(COLLECTION, { invoiceId: id });
+      if (!collection[0]) {
+        error = "Invoice (" + id + ") NOT FOUND!";
+        return { error: error };
+      }
+      const results = await db.deleteOne(COLLECTION, { invoiceId: id });
+      console.log("Invoice " + id + " DELETED");
+      return { result: results };
+    } catch (error) {
+      return { error: error };
+    }
+  };
 
   return {
     get,
@@ -196,5 +220,6 @@ module.exports = () => {
     add,
     addItem,
     deleteItem,
+    deleteInvoice,
   };
 };

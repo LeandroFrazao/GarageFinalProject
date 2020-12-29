@@ -2,6 +2,8 @@ const db = require("../db")();
 const userHashKey = require("../userlogin/hash")();
 const COLLECTION = "users";
 const ObjectID = require("mongodb").ObjectID;
+const { logout } = require("../userlogin/login");
+import { Router } from "express";
 
 module.exports = () => {
   ///////////////////////////////////////////////////////////////////////////
@@ -75,9 +77,35 @@ module.exports = () => {
       return { error: error };
     }
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete user "{DELETE} /users/{email}"  ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteUser = async (id) => {
+    console.log(" --- usersModel.delete --- ");
+    try {
+      id = id.toLowerCase();
+      let results = null;
+      let collection = null;
+      collection = await db.get(COLLECTION, { email: id });
+      if (!collection[0]) {
+        error = "User (" + id + ") NOT FOUND!";
+        return { error: error };
+      } else if (collection[0].userType == "user") {
+        //results = await db.deleteOne(COLLECTION, { email: id });
+
+        const router = Router();
+      }
+
+      console.log("User " + id + " DELETED");
+      return { result: results };
+    } catch (error) {
+      return { error: error };
+    }
+  };
 
   return {
     get,
     add,
+    deleteUser,
   };
 };

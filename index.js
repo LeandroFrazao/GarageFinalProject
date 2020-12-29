@@ -21,6 +21,7 @@ const usersController = require("./controller/users")();
 const vehiclesController = require("./controller/vehicles")();
 const serviceController = require("./controller/service")();
 const invoiceController = require("./controller/invoice")();
+const partsController = require("./controller/parts")();
 
 const cookieParser = require("cookie-parser");
 const app = express();
@@ -30,7 +31,7 @@ app.use((req, res, next) => {
   console.log("[%s] %s -- %s", new Date(), "Method: ", req.method, req.url);
   next();
 });
-const { login } = require("./userlogin/login");
+const { login, logout } = require("./userlogin/login");
 //const { accessLevel } = require("./user/auth");
 const { register, confirmation } = require("./userlogin/register");
 
@@ -90,6 +91,8 @@ app.post(
 );
 //------------> get a user by email or user _id
 app.get("/users/:id", auth, accessLevel, usersController.getById);
+//------------> delete
+app.delete("/users/:email", auth, usersController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         vehicles                                           ////////////////
@@ -106,6 +109,8 @@ app.get(
   auth,
   vehiclesController.getVehicleByEmailController
 );
+//------------> delete
+app.delete("/vehicles/:vin", auth, vehiclesController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         service                                            ////////////////
@@ -122,6 +127,9 @@ app.put(
   auth,
   serviceController.putUpdateStatusController
 );
+//------------> delete
+app.delete("/service/:serviceId", auth, serviceController.deleteController);
+
 //////////////////////////////////////////////////////////////////////////////////
 /////         invoice                                            ////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,11 +147,30 @@ app.delete(
   auth,
   invoiceController.deleteItemController
 );
+//------------> delete
+app.delete("/invoice/:invoiceId", auth, invoiceController.deleteController);
+
+//////////////////////////////////////////////////////////////////////////////////
+/////         parts                                              ////////////////
+////////////////////////////////////////////////////////////////////////////////
+//------------> get all parts
+app.get("/parts", auth, partsController.getController);
+//------------> add a part
+app.post("/parts", auth, validateUser, partsController.postController);
+//------------> get a part by slug
+app.get("/parts/:id", auth, partsController.getByIdController);
+//------------> delete
+app.delete("/parts/:slug", auth, partsController.deleteController);
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
   //console.log(process.env.MONGO_URI)
 });
+
+//////////////////////////////////////////////////////////////////////////////////
+/////        logout                                              ////////////////
+////////////////////////////////////////////////////////////////////////////////
+app.post("/logout", auth, logout);
 
 app.use((req, res) => {
   res.status(404).json({

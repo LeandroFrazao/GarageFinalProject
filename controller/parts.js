@@ -27,7 +27,7 @@ module.exports = () => {
   /////Add new parts  "{POST} /services"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
   const postController = async (req, res) => {
-    const name = req.body.name;
+    const name = req.body.partName;
     const cost = req.body.cost;
     const category = req.body.category;
     const make = req.body.make;
@@ -46,12 +46,23 @@ module.exports = () => {
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Updated the cost of a part "{PUT} /parts/{slug}"                          ///
+  ////Updated the cost of a part "{PUT} /parts/{slug}"                                                 ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const putUpdateCostController = async (req, res) => {
     const slug = req.params.slug;
     const cost = req.body.cost;
     const { result, error } = await parts.putUpdateStatus(slug, cost);
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ parts: result });
+  };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete part "{DELETE} /parts/{slug}"                                                                ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteController = async (req, res) => {
+    const slug = req.params.slug;
+    const { result, error } = await parts.deletePart(slug);
     if (error) {
       return res.status(500).json({ error });
     }
@@ -63,5 +74,6 @@ module.exports = () => {
     getByIdController,
     postController,
     putUpdateCostController,
+    deleteController,
   };
 };

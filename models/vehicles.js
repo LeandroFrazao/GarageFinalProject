@@ -49,13 +49,12 @@ module.exports = () => {
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
-  ////Get all vehicles from user "{GET} /vehicles/{email}"///////////////////////
+  ////Get all vehicles from logged user "{GET} /users/vehicles/"///////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
-  const getVehiclesByUser = async (email) => {
+  const getVehiclesByUser = async () => {
     console.log(" --- vehiclesModel.getIssuesByProject --- ");
     try {
-      email = email.toLowerCase();
-
+      const email = auth.currentUser.userEmail; //whoever is logged is going to record automatically the email of the current user
       const PIPELINE_EMAIL_VEHICLES = [
         {
           $lookup: {
@@ -118,10 +117,32 @@ module.exports = () => {
       return { error: error };
     }
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Delete vehicle "{DELETE} /vehicles/{VIN}"  ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const deleteVehicle = async (id) => {
+    console.log(" --- vehiclesModel.delete --- ");
+    try {
+      id = id.toUpperCase();
+
+      let collection = null;
+      collection = await db.get(COLLECTION, { vin: id });
+      if (!collection[0]) {
+        error = "Vehicle (" + id + ") NOT FOUND!";
+        return { error: error };
+      }
+      const results = await db.deleteOne(COLLECTION, { vin: id });
+      console.log("Vehicle " + id + " DELETED");
+      return { result: results };
+    } catch (error) {
+      return { error: error };
+    }
+  };
 
   return {
     get,
     getVehiclesByUser,
     add,
+    deleteVehicle,
   };
 };
