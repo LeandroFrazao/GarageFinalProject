@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const db = require("../db")();
 const userHashKey = require("./hash")();
 const crypto = require("crypto");
-import { Request, Response } from "express";
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 //\\                       LOGIN                                            \\\\\\\\\\\\\\\\\\\
@@ -83,8 +82,4 @@ exports.logout = async (req, res) => {
   });
 
   res.send("Logout successful");
-};
-
-export const logOut = (req: Request, res: Response) => {
-  new Promise((resolve, reject) => {});
 };

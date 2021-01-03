@@ -3,7 +3,6 @@ const userHashKey = require("../userlogin/hash")();
 const COLLECTION = "users";
 const ObjectID = require("mongodb").ObjectID;
 const { logout } = require("../userlogin/login");
-import { Router } from "express";
 
 module.exports = () => {
   ///////////////////////////////////////////////////////////////////////////
