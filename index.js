@@ -11,7 +11,7 @@
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 const express = require("express");
-
+const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const hostname = "0.0.0.0";
@@ -27,8 +27,17 @@ const cookieParser = require("cookie-parser");
 const app = express();
 
 //login
+app.use(cors());
 app.use((req, res, next) => {
   console.log("[%s] %s -- %s", new Date(), "Method: ", req.method, req.url);
+  next();
+});
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   next();
 });
 const { login, logout } = require("./userlogin/login");
