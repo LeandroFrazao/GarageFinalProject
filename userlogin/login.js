@@ -51,7 +51,7 @@ exports.login = async (req, res, next) => {
         }
       );
       // generate a cookie containing the token
-      res.cookie("jwt", token, { secure: false, httpOnly: true }); // IMPORTANTE CHANGE SECURE TO FALSE IF RUN LOCALLY
+      res.cookie("jwt", token, { secure: true, httpOnly: true }); // IMPORTANTE CHANGE SECURE TO FALSE IF RUN LOCALLY
       res.success = user[0].email + " logged in";
       res.user = user[0];
 
