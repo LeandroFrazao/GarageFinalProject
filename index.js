@@ -101,7 +101,7 @@ app.post(
   usersController.postController
 );
 //------------> get a user by email or user _id
-app.get("/users/:id", accessLevel, usersController.getById);
+app.get("/users/:id", usersController.getById);
 //------------> delete
 app.delete("/users/:email", usersController.deleteController);
 
@@ -111,7 +111,7 @@ app.delete("/users/:email", usersController.deleteController);
 //------------> get all users
 app.get("/vehicles", vehiclesController.getController);
 //------------> add an user
-app.post("/vehicles", validateUser, vehiclesController.postController);
+app.post("/vehicles", vehiclesController.postController);
 //------------> get a user by VIN
 app.get("/vehicles/:id", vehiclesController.getByIdController);
 //------------> get a user by email or user _id
