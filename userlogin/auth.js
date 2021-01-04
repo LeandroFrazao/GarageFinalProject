@@ -8,9 +8,16 @@ exports.auth = (req, res, next) => {
   //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   try {
     //get the token from the cookie jwt
-    let accessToken = req.cookies.jwt;
-    console.log(req.cookies);
+    console.log(req.cookies.jwt);
     console.log(req.headers.authorization.split(" ")[1]);
+
+    let accessToken = req.cookies.jwt;
+    console.log("accessToken");
+    console.log(req.headers.authorization.split(" ")[1]);
+    if (!accessToken) {
+      accessToken = req.headers.authorization.split(" ")[1];
+    }
+
     //check if cookie exist, otherwise return an error
     if (!accessToken) {
       return res.status(403).send({
