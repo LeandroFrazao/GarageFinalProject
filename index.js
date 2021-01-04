@@ -41,6 +41,7 @@ app.use((req, res, next) => {
 
   next();
 });
+app.use(express.json());
 const { login, logout } = require("./userlogin/login");
 
 const { register, confirmation } = require("./userlogin/register");
