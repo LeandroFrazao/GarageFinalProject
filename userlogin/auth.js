@@ -26,7 +26,9 @@ exports.auth = (req, res, next) => {
     }
     //console.log(token.RANDOM_TOKEN);
     // import the random string from token.js
-    const RANDOM_TOKEN = token.RANDOM_TOKEN;
+    //const RANDOM_TOKEN = token.RANDOM_TOKEN;
+    const RANDOM_TOKEN = "ger'sgarage";
+
     //Check whether the token is valid, if not, it returns an error.
     const decodedToken = jwt.verify(accessToken, RANDOM_TOKEN);
     //onsole.log(decodedToken);
