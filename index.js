@@ -38,10 +38,11 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
+  res.header("localhost:3000");
   next();
 });
 const { login, logout } = require("./userlogin/login");
-//const { accessLevel } = require("./user/auth");
+
 const { register, confirmation } = require("./userlogin/register");
 
 //variables are loaded with validator to be used on the routes.
@@ -89,67 +90,68 @@ app.get("/verify/:randomtoken", confirmation);
 /////         USERS                                              ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all users
-app.get("/users", auth, accessLevel, usersController.getController);
+app.use(auth);
+app.get("/users", accessLevel, usersController.getController);
 //------------> add an user
 app.post(
   "/users",
-  auth,
+
   accessLevel,
   validateUser,
   usersController.postController
 );
 //------------> get a user by email or user _id
-app.get("/users/:id", auth, accessLevel, usersController.getById);
+app.get("/users/:id", accessLevel, usersController.getById);
 //------------> delete
-app.delete("/users/:email", auth, usersController.deleteController);
+app.delete("/users/:email", usersController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         vehicles                                           ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all users
-app.get("/vehicles", auth, vehiclesController.getController);
+app.get("/vehicles", vehiclesController.getController);
 //------------> add an user
-app.post("/vehicles", auth, validateUser, vehiclesController.postController);
+app.post("/vehicles", validateUser, vehiclesController.postController);
 //------------> get a user by VIN
-app.get("/vehicles/:id", auth, vehiclesController.getByIdController);
+app.get("/vehicles/:id", vehiclesController.getByIdController);
 //------------> get a user by email or user _id
 app.get(
   "/users/:email/vehicles",
-  auth,
+
   vehiclesController.getVehicleByEmailController
 );
 //------------> delete
-app.delete("/vehicles/:vin", auth, vehiclesController.deleteController);
+app.delete("/vehicles/:vin", vehiclesController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         service                                            ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all services
-app.get("/service", auth, serviceController.getController);
+app.get("/service", serviceController.getController);
 //------------> add an service
-app.post("/service", auth, validateUser, serviceController.postController);
+app.post("/service", serviceController.postController);
 //------------> get a service by serviceId
-app.get("/service/:id", auth, serviceController.getByIdController);
+app.get("/service/:id", serviceController.getByIdController);
 //------------> change status of service
 app.put(
   "/service/:serviceId/:status",
-  auth,
+
   serviceController.putUpdateStatusController
 );
 //------------> delete
-app.delete("/service/:serviceId", auth, serviceController.deleteController);
+app.delete("/service/:serviceId", serviceController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         invoice                                            ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all invoices
-app.get("/invoice", auth, invoiceController.getController);
+app.get("/invoice", invoiceController.getController);
 //------------> add an invoice
-app.post("/invoice", auth, validateUser, invoiceController.postController);
+app.post("/invoice", invoiceController.postController);
 //------------> get an invoice by invoiceId
-app.get("/invoice/:id", auth, invoiceController.getByIdController);
+app.get("/invoice/:id", invoiceController.getByIdController);
 //------------> add items
-app.post("/invoice/:invoiceId", auth, invoiceController.postItemController);
+app.post("/invoice/:invoiceId", invoiceController.postItemController);
 //------------> delete items
 app.delete(
   "/invoice/:invoiceId/:itemId",
@@ -157,19 +159,19 @@ app.delete(
   invoiceController.deleteItemController
 );
 //------------> delete
-app.delete("/invoice/:invoiceId", auth, invoiceController.deleteController);
+app.delete("/invoice/:invoiceId", invoiceController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         parts                                              ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all parts
-app.get("/parts", auth, partsController.getController);
+app.get("/parts", partsController.getController);
 //------------> add a part
-app.post("/parts", auth, validateUser, partsController.postController);
+app.post("/parts", partsController.postController);
 //------------> get a part by slug
-app.get("/parts/:id", auth, partsController.getByIdController);
+app.get("/parts/:id", partsController.getByIdController);
 //------------> delete
-app.delete("/parts/:slug", auth, partsController.deleteController);
+app.delete("/parts/:slug", partsController.deleteController);
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
@@ -179,7 +181,7 @@ app.listen(port, hostname, () => {
 //////////////////////////////////////////////////////////////////////////////////
 /////        logout                                              ////////////////
 ////////////////////////////////////////////////////////////////////////////////
-app.post("/logout", auth, logout);
+app.post("/logout", logout);
 
 app.use((req, res) => {
   res.status(404).json({

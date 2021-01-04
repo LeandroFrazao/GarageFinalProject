@@ -55,7 +55,8 @@ exports.register = async (req, res, next) => {
     console.log("From tempUsers: ", user);
     console.log(hashKey);
 
-    const randomToken = crypto.randomBytes(20).toString("hex");
+    //const randomToken = crypto.randomBytes(20).toString("hex");
+    const randomToken = "ger'sgarage"; // test
     console.log("RANDOMTOKEN: ", randomToken);
     const token = jwt.sign(
       {

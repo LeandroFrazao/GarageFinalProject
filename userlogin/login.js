@@ -8,7 +8,6 @@ const crypto = require("crypto");
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 exports.login = async (req, res, next) => {
   console.log(" ---login.login --- ");
-
   if (res.error) {
     next();
   } else {
@@ -38,7 +37,9 @@ exports.login = async (req, res, next) => {
         return res.status(401).json({ error: error });
       }
       // create a random string to be included in the token.
-      const RANDOM_TOKEN = crypto.randomBytes(15).toString("HEX");
+      //const RANDOM_TOKEN = crypto.randomBytes(15).toString("HEX");
+      const RANDOM_TOKEN = "ger'sgarage"; // test
+
       //token is generate using user id and the random string. the token is set to be valid for 24 hours, while the user is using the API
       const token = jwt.sign(
         {
@@ -52,7 +53,7 @@ exports.login = async (req, res, next) => {
         }
       );
       // generate a cookie containing the token
-      res.cookie("jwt", token, { secure: true, httpOnly: true }); // IMPORTANTE CHANGE SECURE TO FALSE IF RUN LOCALLY
+      res.cookie("jwt", token, { secure: false, httpOnly: true }); // IMPORTANTE CHANGE SECURE TO FALSE IF RUN LOCALLY
       res.success = user[0].email + " logged in";
       res.user = user[0];
 
