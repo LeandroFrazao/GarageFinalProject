@@ -32,8 +32,8 @@ exports.register = async (req, res, next) => {
     if (user.result) {
       console.log("Email already registered.");
       res.error = "Email already registered.";
-      return next();
-      // return res.status(500).json({ error: "Email already registered." });
+      //return next();
+      return res.status(500).json({ error: "Email already registered." });
     }
 
     let hashKey = await userHashKey.hash(newUser.key); // call a function to hash the user key
