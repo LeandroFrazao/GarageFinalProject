@@ -39,25 +39,13 @@ exports.register = async (req, res, next) => {
     let hashKey = await userHashKey.hash(newUser.key); // call a function to hash the user key
 
     // replace a document if it was found, or create a new one.
-    user = await db.replace(
-      "tempUsers",
-      { email: newUser.email },
-      {
-        name: newUser.name,
-        email: newUser.email,
-        userType: newUser.userType,
-        phone: newUser.phone,
-        address: newUser.address,
-        city: newUser.city,
-        key: hashKey,
-      }
-    );
-    console.log("From tempUsers: ", user);
+
+    const randomToken = crypto.randomBytes(20).toString("hex");
+    //const randomToken = "ger'sgarage"; // test
+    console.log("RANDOMTOKEN: ", randomToken);
+
     console.log(hashKey);
 
-    //const randomToken = crypto.randomBytes(20).toString("hex");
-    const randomToken = "ger'sgarage"; // test
-    console.log("RANDOMTOKEN: ", randomToken);
     const token = jwt.sign(
       {
         user: req.body.email,
@@ -68,6 +56,23 @@ exports.register = async (req, res, next) => {
       }
     );
     res.cookie("vrf", token, { secure: false, httpOnly: true });
+
+    user = await db.replace(
+      "tempUsers",
+      { email: newUser.email },
+      {
+        token: token,
+        randomToken: randomToken,
+        name: newUser.name,
+        email: newUser.email,
+        userType: newUser.userType,
+        phone: newUser.phone,
+        address: newUser.address,
+        city: newUser.city,
+        key: hashKey,
+      }
+    );
+    console.log("From tempUsers: ", user);
 
     //message for the user
     const msgToUser = {
@@ -144,11 +149,15 @@ exports.confirmation = async (req, res, next) => {
 
     //check if cookie exist, otherwise return an error
     if (!accessToken) {
-      res.error = "No cookie found. Need to Register, go to:  '/register' ";
-
-      return res.status(403).send({
-        error: "No cookie found. Need to Register, go to:  '/register' ",
-      });
+      //res.error = "No cookie found. Need to Register, go to:  '/register' ";
+      let userToken = await db.get("tempUsers", { randomToken: randomToken });
+      console.log(userToken);
+      if (userToken[0]) {
+        accessToken = userToken[0].token;
+      } else
+        return res.status(403).send({
+          error: "No cookie found. Need to Register, go to:  '/register' ",
+        });
     }
     // verify toekn is valid
     const decodedToken = jwt.verify(accessToken, randomToken);
