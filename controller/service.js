@@ -23,6 +23,18 @@ module.exports = () => {
     res.json({ services: result });
   };
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  ////Get all services for an user "{GET} /users/{email}/service"///////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  const getServiceByEmailController = async (req, res) => {
+    const email = req.params.email;
+    const { result, error } = await services.getServicesByUser(email);
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ users: result });
+  };
+
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new service to an user individually "{POST} /services"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -73,6 +85,7 @@ module.exports = () => {
   return {
     getController,
     getByIdController,
+    getServiceByEmailController,
     postController,
     putUpdateStatusController,
     deleteController,

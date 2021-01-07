@@ -136,10 +136,13 @@ app.delete("/vehicles/:vin", vehiclesController.deleteController);
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all services
 app.get("/service", serviceController.getController);
-//------------> add an service
-app.post("/service", serviceController.postController);
 //------------> get a service by serviceId
 app.get("/service/:id", serviceController.getByIdController);
+//------------> get services by email
+app.get("/users/:email/service", serviceController.getServiceByEmailController);
+//------------> add an service
+app.post("/service", serviceController.postController);
+
 //------------> change status of service
 app.put(
   "/service/:serviceId/:status",
@@ -159,7 +162,7 @@ app.post("/invoice", accessLevel, invoiceController.postController);
 //------------> get an invoice by invoiceId
 app.get("/invoice/:id", accessLevel, invoiceController.getByIdController);
 //------------> get an invoice by email
-app.get("/invoice/:id", invoiceController.getInvoiceByEmailController);
+app.get("/users/:email/invoice", invoiceController.getInvoiceByEmailController);
 
 //------------> add items
 app.post(

@@ -49,17 +49,17 @@ module.exports = () => {
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
-  ////Get all invoice from user "{GET} /invoices/{email}"///////////////////////
+  ////Get all invoice from user "{GET} /users/{email}/invoice"///////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
   const getInvoicesByUser = async (email) => {
-    console.log(" --- invoicesModel.getIssuesByProject --- ");
+    console.log(" --- invoicesModel.getIInvoicesByUser --- ");
     try {
       // load the user's email and the type of user who is logged in.
       let userEmail = auth.currentUser.userEmail;
       let userType = auth.currentUser.userType;
 
       email = email.toLowerCase();
-      //if
+      //if userType is not admin, it's not possible to see other user accounts.
       if (userType !== "admin") {
         email = userEmail;
       }
@@ -67,25 +67,26 @@ module.exports = () => {
       const PIPELINE_EMAIL_INVOICES = [
         {
           $lookup: {
-            from: "invoices",
+            from: "invoice",
             localField: "email",
             foreignField: "email",
-            as: "users",
+            as: "invoices",
           },
         },
         { $match: { email: email } },
       ];
 
-      const invoices = await db.aggregate("invoice", PIPELINE_EMAIL_INVOICES);
-      if (!invoices[0]) {
+      const users = await db.aggregate("users", PIPELINE_EMAIL_INVOICES);
+      console.log(users[0]);
+      if (!users[0]) {
         error = "Email (" + email + ") NOT FOUND!";
         return { error: error };
       }
-      if (invoices[0].issue.length == 0) {
-        error = "invoices for email (" + email + ") NOT FOUND!";
+      if (users[0].invoices.length == 0) {
+        error = "Services for email (" + email + ") NOT FOUND!";
         return { error: error };
       }
-      return { result: invoices };
+      return { result: users };
     } catch (error) {
       return { error: error };
     }
@@ -147,7 +148,7 @@ module.exports = () => {
       );
       console.log(lastId_items);
       if (lastId_items[0]) {
-        // if  was found the project, then count_comments is not undefined.
+        // if  was found the item, then count_comments is not undefined.
         count = lastId_items[0].item.itemId + 1;
       } else {
         error = "Invoice (" + invoiceId + ") NOT FOUND!";

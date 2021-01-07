@@ -52,7 +52,7 @@ module.exports = () => {
   ////Get all vehicles from logged user "{GET} /users/vehicles/"///////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
   const getVehiclesByUser = async () => {
-    console.log(" --- vehiclesModel.getIssuesByProject --- ");
+    console.log(" --- vehiclesModel.getVehiclesByUser --- ");
     try {
       const email = auth.currentUser.userEmail; //whoever is logged is going to record automatically the email of the current user
       const PIPELINE_EMAIL_VEHICLES = [

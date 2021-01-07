@@ -5,9 +5,9 @@ const ObjectID = require("mongodb").ObjectID;
 
 module.exports = () => {
   //////////////////////////////////////////////////////////////////////////////////
-  ////Get all services "{GET} /services"///////////////////////////////////////////////
+  ////Get all services "{GET} /service"///////////////////////////////////////////////
   ////Or                                    //////////////////////////////////////
-  ////Get individual service "{GET} /services/{:vin}" or {_id}//////////////
+  ////Get individual service "{GET} /service/{:vin}" or {_id}//////////////
   //////////////////////////////////////////////////////////////////////////////
   const get = async (id = null) => {
     // find document or using serviceId or _id
@@ -43,6 +43,50 @@ module.exports = () => {
       }
 
       return { result: services };
+    } catch (error) {
+      return { error: error };
+    }
+  };
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  ////Get all services from user "{GET} /users/{email}/service/"///////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  const getServicesByUser = async (email) => {
+    console.log(" --- servicesModel.getServiceByUser --- ");
+    try {
+      // load the user's email and the type of user who is logged in.
+      let userEmail = auth.currentUser.userEmail;
+      let userType = auth.currentUser.userType;
+
+      email = email.toLowerCase();
+      //if userType is not admin, it's not possible to see other user accounts.
+      if (userType !== "admin") {
+        email = userEmail;
+      }
+
+      const PIPELINE_EMAIL_SERVICES = [
+        {
+          $lookup: {
+            from: "service",
+            localField: "email",
+            foreignField: "email",
+            as: "services",
+          },
+        },
+        { $match: { email: email } },
+      ];
+
+      const users = await db.aggregate("users", PIPELINE_EMAIL_SERVICES);
+      console.log(users[0]);
+      if (!users[0]) {
+        error = "Email (" + email + ") NOT FOUND!";
+        return { error: error };
+      }
+      if (users[0].services.length == 0) {
+        error = "Services for email (" + email + ") NOT FOUND!";
+        return { error: error };
+      }
+      return { result: users };
     } catch (error) {
       return { error: error };
     }
@@ -87,6 +131,7 @@ module.exports = () => {
       return { error: error };
     }
   };
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////Updated the status of a service "{PUT} /service/{serviceId}/{STATUS}"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,6 +183,7 @@ module.exports = () => {
 
   return {
     get,
+    getServicesByUser,
     add,
     putUpdateStatus,
     deleteService,
