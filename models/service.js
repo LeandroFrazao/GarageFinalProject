@@ -53,8 +53,10 @@ module.exports = () => {
   ////////////////////////////////////////////////////////////////////////////////////////
   const add = async (vin, status, description, staff, service) => {
     console.log(" --- servicesModel.add --- ");
-
     try {
+      // load the user's email and the type of user who is logged in.
+      let userEmail = auth.currentUser.userEmail;
+
       vin = vin.toUpperCase();
       const date = new Date();
       const date_in =
@@ -71,6 +73,7 @@ module.exports = () => {
       }
 
       const results = await db.add(COLLECTION, {
+        email: userEmail,
         serviceId: serviceId,
         vin: vin,
         status: status,

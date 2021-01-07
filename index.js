@@ -157,17 +157,28 @@ app.get("/invoice", accessLevel, invoiceController.getController);
 //------------> add an invoice
 app.post("/invoice", accessLevel, invoiceController.postController);
 //------------> get an invoice by invoiceId
-app.get("/invoice/:id", invoiceController.getByIdController);
+app.get("/invoice/:id", accessLevel, invoiceController.getByIdController);
+//------------> get an invoice by email
+app.get("/invoice/:id", invoiceController.getInvoiceByEmailController);
+
 //------------> add items
-app.post("/invoice/:invoiceId", invoiceController.postItemController);
+app.post(
+  "/invoice/:invoiceId",
+  accessLevel,
+  invoiceController.postItemController
+);
 //------------> delete items
 app.delete(
   "/invoice/:invoiceId/:itemId",
   accessLevel,
   invoiceController.deleteItemController
 );
-//------------> delete
-app.delete("/invoice/:invoiceId", invoiceController.deleteController);
+//------------> delete invoice
+app.delete(
+  "/invoice/:invoiceId",
+  accessLevel,
+  invoiceController.deleteController
+);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         parts                                              ////////////////

@@ -16,7 +16,7 @@ module.exports = () => {
     var users = null; //initialize variable
 
     try {
-      // load the active user email who is logged in.
+      // load the user's email  of user who is logged in.
       const userEmail = auth.currentUser.userEmail;
 
       // check if id is null or empty
@@ -89,7 +89,7 @@ module.exports = () => {
   const deleteUser = async (id) => {
     console.log(" --- usersModel.delete --- ");
 
-    // load the active user email who is logged in.
+    // load the user's email and the type of user who is logged in.
     const userEmail = auth.currentUser.userEmail;
     const userType = auth.currentUser.userType;
     try {

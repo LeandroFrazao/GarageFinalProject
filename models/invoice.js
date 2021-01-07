@@ -54,7 +54,16 @@ module.exports = () => {
   const getInvoicesByUser = async (email) => {
     console.log(" --- invoicesModel.getIssuesByProject --- ");
     try {
+      // load the user's email and the type of user who is logged in.
+      let userEmail = auth.currentUser.userEmail;
+      let userType = auth.currentUser.userType;
+
       email = email.toLowerCase();
+      //if
+      if (userType !== "admin") {
+        email = userEmail;
+      }
+
       const PIPELINE_EMAIL_INVOICES = [
         {
           $lookup: {
