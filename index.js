@@ -26,7 +26,11 @@ const partsController = require("./controller/parts")();
 const cookieParser = require("cookie-parser");
 const app = express();
 
-//login
+app.use("/", express.static("static")); //call the index.html in static folder
+
+///////////////////////////////////////
+//////////login         //////////////
+/////////////////////////////////////
 app.use(cors());
 app.use((req, res, next) => {
   console.log("[%s] %s -- %s", new Date(), "Method: ", req.method, req.url);
@@ -41,20 +45,22 @@ app.use((req, res, next) => {
 
   next();
 });
-app.use(express.json());
+
+//app.use(express.json());   // TESTING
+app.use(cookieParser());
+app.use(bodyParser.json());
 const { login, logout } = require("./userlogin/login");
 
 const { register, confirmation } = require("./userlogin/register");
 
 //variables are loaded with validator to be used on the routes.
 const { validateLogin, validateUser } = require("./userlogin/validator");
-app.use(cookieParser());
-app.use(bodyParser.json());
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 //\\                       AUTHENTICATION                                   \\\\\\\\\\\\\\\\\\\
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-const { auth, accessLevel } = require("./userlogin/auth");
+const { auth } = require("./userlogin/auth");
+const { accessLevel } = require("./userlogin/accessLevel");
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 //\\     In Postman(or similar)                                           \\\\\\\\\\\\\\\\\\\
@@ -81,6 +87,7 @@ app.post("/login", validateLogin, login);
 //\\                       /verify/ {token sent by email}                   \\\\\\\\\\\\\\\\\\\
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 app.post("/register", validateUser, register);
+
 app.get("/verify/:randomtoken", confirmation);
 
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -102,7 +109,7 @@ app.post(
   usersController.postController
 );
 //------------> get a user by email or user _id
-app.get("/users/:id", usersController.getById);
+app.get("/users/:id", accessLevel, usersController.getById);
 //------------> delete
 app.delete("/users/:email", usersController.deleteController);
 
@@ -110,12 +117,12 @@ app.delete("/users/:email", usersController.deleteController);
 /////         vehicles                                           ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all users
-app.get("/vehicles", vehiclesController.getController);
-//------------> add an user
-app.post("/vehicles", vehiclesController.postController);
+app.get("/vehicles", accessLevel, vehiclesController.getController);
+//------------> add a vehicle
+app.post("/vehicles", accessLevel, vehiclesController.postController);
 //------------> get a user by VIN
-app.get("/vehicles/:id", vehiclesController.getByIdController);
-//------------> get a user by email or user _id
+app.get("/vehicles/:id", accessLevel, vehiclesController.getByIdController);
+//------------> get a vehicle by email or user _id
 app.get(
   "/users/:email/vehicles",
 
@@ -136,7 +143,7 @@ app.get("/service/:id", serviceController.getByIdController);
 //------------> change status of service
 app.put(
   "/service/:serviceId/:status",
-
+  accessLevel,
   serviceController.putUpdateStatusController
 );
 //------------> delete
@@ -146,9 +153,9 @@ app.delete("/service/:serviceId", serviceController.deleteController);
 /////         invoice                                            ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all invoices
-app.get("/invoice", invoiceController.getController);
+app.get("/invoice", accessLevel, invoiceController.getController);
 //------------> add an invoice
-app.post("/invoice", invoiceController.postController);
+app.post("/invoice", accessLevel, invoiceController.postController);
 //------------> get an invoice by invoiceId
 app.get("/invoice/:id", invoiceController.getByIdController);
 //------------> add items
@@ -156,7 +163,7 @@ app.post("/invoice/:invoiceId", invoiceController.postItemController);
 //------------> delete items
 app.delete(
   "/invoice/:invoiceId/:itemId",
-  auth,
+  accessLevel,
   invoiceController.deleteItemController
 );
 //------------> delete
@@ -168,21 +175,21 @@ app.delete("/invoice/:invoiceId", invoiceController.deleteController);
 //------------> get all parts
 app.get("/parts", partsController.getController);
 //------------> add a part
-app.post("/parts", partsController.postController);
+app.post("/parts", accessLevel, partsController.postController);
 //------------> get a part by slug
 app.get("/parts/:id", partsController.getByIdController);
 //------------> delete
-app.delete("/parts/:slug", partsController.deleteController);
-
-app.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-  //console.log(process.env.MONGO_URI)
-});
+app.delete("/parts/:slug", accessLevel, partsController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////        logout                                              ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 app.post("/logout", logout);
+
+app.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+  //console.log(process.env.MONGO_URI)
+});
 
 app.use((req, res) => {
   res.status(404).json({

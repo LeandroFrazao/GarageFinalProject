@@ -2,6 +2,7 @@ const db = require("../db")();
 const userHashKey = require("../userlogin/hash")();
 const COLLECTION = "users";
 const ObjectID = require("mongodb").ObjectID;
+const auth = require("../userlogin/auth");
 const { logout } = require("../userlogin/login");
 
 module.exports = () => {
@@ -15,15 +16,21 @@ module.exports = () => {
     var users = null; //initialize variable
 
     try {
+      // load the active user email who is logged in.
+      const userEmail = auth.currentUser.userEmail;
+
+      // check if id is null or empty
       if (!id) {
-        // check if id is null or empty
         users = await db.get(COLLECTION);
         if (users.length == 0) {
           error = "No Users Registered";
           return { error: error };
         }
       } else {
-        const email = id.toLowerCase();
+        //const email = id.toLowerCase();
+
+        const email = userEmail;
+
         if (ObjectID.isValid(id)) {
           //check if object is valid
           PIPELINE_ID_OBJECT_OR_EMAIL = {
@@ -81,7 +88,14 @@ module.exports = () => {
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const deleteUser = async (id) => {
     console.log(" --- usersModel.delete --- ");
+
+    // load the active user email who is logged in.
+    const userEmail = auth.currentUser.userEmail;
+    const userType = auth.currentUser.userType;
     try {
+      if (userType !== "admin") {
+        id = userEmail;
+      }
       id = id.toLowerCase();
       let results = null;
       let collection = null;

@@ -141,44 +141,49 @@ exports.register = async (req, res, next) => {
 };
 
 exports.confirmation = async (req, res, next) => {
-  const randomToken = req.params.randomtoken; // randomToken that was sent by email
-  let accessToken = req.cookies.vrf; //get the token from the cookie vrf
-  console.log("RandomToken: ", randomToken);
+  console.log("--------register.confirmation----------");
   try {
-    console.log("cookie: ", accessToken);
-
+    const randomToken = req.params.randomtoken; // randomToken that was sent by email
+    let accessToken = req.cookies.vrf; //get the token from the cookie vrf
+    //console.log("cookie: ", accessToken);
+    // console.log("RandomToken: ", randomToken);
     //check if cookie exist, otherwise return an error
     if (!accessToken) {
       //res.error = "No cookie found. Need to Register, go to:  '/register' ";
       let userToken = await db.get("tempUsers", { randomToken: randomToken });
-      console.log(userToken);
+      // console.log(userToken);
       if (userToken[0]) {
         accessToken = userToken[0].token;
-      } else
-        return res.status(403).send({
+      } else {
+        res.error = {
           error: "No cookie found. Need to Register, go to:  '/register' ",
-        });
+        };
+        // return res.status(403).send({ error: "No cookie found. Need to Register, go to:  '/register' ",});
+        res.status(403);
+        return res.redirect("/invalid.html");
+      }
     }
-    // verify toekn is valid
+    // verify token is valid
     const decodedToken = jwt.verify(accessToken, randomToken);
     //console.log("DecodeToken: ", decodedToken.user);
 
     //check if user is already verified
     let user = await db.get("users", { email: decodedToken.user });
     if (user[0]) {
-      res.error = "The account has been verified. Please log in. ";
-
-      return res
-        .status(400)
-        .send({ msg: "The account has been verified. Please log in." });
+      res.success = "The account has been verified. Please log in. ";
+      //return res.status(400).send({ msg: "The account has been verified. Please log in." });
+      res.status(400);
+      return res.redirect("/verified.html");
     }
 
     //check whether email exists in the tempUsers collection in mongoDB
     user = await db.get("tempUsers", { email: decodedToken.user });
     if (!user[0]) {
       res.error = "User Not Found for this token.";
-
-      return res.status(400).send({ msg: "User Not Found for this token." });
+      console.log(res.error);
+      //return res.status(400).send({ msg: "User Not Found for this token." });
+      res.status(400);
+      return res.redirect("/invalid.html");
     }
 
     //console.log("user from Token: ", user[0]);
@@ -194,15 +199,14 @@ exports.confirmation = async (req, res, next) => {
     });
     //then, after user document is added in users collection, data from tempUsers is deleted.
     await db.deleteOne("tempUsers", { _id: user[0]._id });
-    console.log("user from Add: ", results.ops);
-    res
-      .status(200)
-      .send({ msg: "The account has been verified. Please log in." });
+    console.log("user from tempUser deleted: ", results.ops);
+    //res.status(200).send({ msg: "The account has been verified. Please log in." });
+    res.status(400);
+    return res.redirect("/verified.html");
   } catch (e) {
     res.error = "Your token expired.";
-
-    return res.status(400).send({
-      msg: "Your token expired.",
-    });
+    //res.status(400).send({ msg: "Your token expired." });
+    res.status(400);
+    return res.redirect("/expired.html");
   }
 };
