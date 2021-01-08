@@ -109,7 +109,7 @@ app.post(
   usersController.postController
 );
 //------------> get a user by email or user _id
-app.get("/users/:id", accessLevel, usersController.getById);
+app.get("/users/:id", usersController.getById);
 //------------> delete
 app.delete("/users/:email", usersController.deleteController);
 

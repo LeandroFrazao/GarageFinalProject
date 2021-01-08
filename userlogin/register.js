@@ -12,6 +12,7 @@ exports.register = async (req, res, next) => {
     " --- register.register -------------------------------------------------- "
   );
   if (res.error) {
+    console.log(res.error);
     next();
   } else {
     //  try {
@@ -25,11 +26,11 @@ exports.register = async (req, res, next) => {
       userType: req.body.userType,
       key: req.body.key,
     };
-    console.log(newUser);
-    let user = await users.get(newUser.email);
-    console.log("From users: ", user.result);
+    // console.log(newUser);
+    let user = await db.get("users", { email: newUser.email });
+    console.log("From users: ", user[0]);
     //if user is already resgistered, return an error
-    if (user.result) {
+    if (user[0]) {
       console.log("Email already registered.");
       res.error = "Email already registered.";
       //return next();

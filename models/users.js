@@ -16,8 +16,14 @@ module.exports = () => {
     var users = null; //initialize variable
 
     try {
-      // load the user's email  of user who is logged in.
-      const userEmail = auth.currentUser.userEmail;
+      let userEmail = auth.currentUser.userEmail;
+      let userType = auth.currentUser.userType;
+
+      id = id.toLowerCase();
+      //if userType is not admin, it's not possible to see other user accounts.
+      if (userType !== "admin") {
+        id = userEmail;
+      }
 
       // check if id is null or empty
       if (!id) {
