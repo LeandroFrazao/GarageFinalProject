@@ -60,11 +60,15 @@ module.exports = () => {
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Delete vehicle "{DELETE} /vehicles/{vin}"                                                      ///
+  ////Delete vehicle "{DELETE} /users/{:email}/vehicles"                                                      ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const deleteController = async (req, res) => {
-    const id = req.params.vin;
-    const { result, error } = await vehicles.deleteVehicle(id);
+    const vin = req.body.vin;
+    const email = req.params.email;
+    const { result, error } = await vehicles.deleteVehicle({
+      vin: vin,
+      email: email,
+    });
     if (error) {
       return res.status(500).json({ error });
     }

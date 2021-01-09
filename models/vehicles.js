@@ -128,21 +128,59 @@ module.exports = () => {
     }
   };
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Delete vehicle "{DELETE} /vehicles/{VIN}"  ///
+  ////Delete vehicle "{DELETE} /users/{:email}/vehicles/"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const deleteVehicle = async (id) => {
+  const deleteVehicle = async ({ email, vin }) => {
     console.log(" --- vehiclesModel.delete --- ");
     try {
-      id = id.toUpperCase();
+      vin = vin.toUpperCase();
+      email = email.toLowerCase();
+      // load the user's email and the type of user who is logged in.
+      let userEmail = auth.currentUser.userEmail;
+      let userType = auth.currentUser.userType;
 
-      let collection = null;
-      collection = await db.get(COLLECTION, { vin: id });
+      //if userType is not admin, it's not possible to see other user accounts.
+      if (userType !== "admin") {
+        email = userEmail;
+      }
+      const PIPELINE_EMAIL_VEHICLES = [
+        { $match: { email: email } },
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "email",
+            foreignField: "email",
+            as: "vehicle",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            vehicle: {
+              $filter: {
+                input: "$vehicle",
+                as: "vehicle",
+                cond: { $eq: ["$$vehicle.vin", vin] },
+              },
+            },
+          },
+        },
+      ];
+      const collection = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
+
+      //collection = await db.get(COLLECTION, { vin: id });
+      console.log(collection[0]);
       if (!collection[0]) {
-        error = "Vehicle (" + id + ") NOT FOUND!";
+        error = "Vehicle (" + vin + ") NOT FOUND!";
         return { error: error };
       }
-      const results = await db.deleteOne(COLLECTION, { vin: id });
-      console.log("Vehicle " + id + " DELETED");
+      console.log(collection[0].vehicle[0]._id);
+
+      const results = await db.deleteOne(COLLECTION, {
+        _id: collection[0].vehicle[0]._id,
+      });
+      console.log("Vehicle " + vin + " DELETED");
       return { result: results };
     } catch (error) {
       return { error: error };

@@ -130,8 +130,8 @@ app.get(
 
   vehiclesController.getVehicleByEmailController
 );
-//------------> delete
-app.delete("/vehicles/:vin", vehiclesController.deleteController);
+//------------> delete vehicle
+app.delete("/users/:email/vehicles", vehiclesController.deleteController);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         service                                            ////////////////
