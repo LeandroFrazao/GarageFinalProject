@@ -42,6 +42,8 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
+  res.header("Acces-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
+  res.header("Acces-Contorl-Allow-Methods", "Content-Type", "Authorization");
 
   next();
 });

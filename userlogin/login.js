@@ -8,6 +8,7 @@ const crypto = require("crypto");
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 exports.login = async (req, res, next) => {
   console.log(" ---login.login --- ");
+
   if (res.error) {
     next();
   } else {
@@ -56,7 +57,7 @@ exports.login = async (req, res, next) => {
       res.cookie("jwt", token, { secure: false, httpOnly: true }); // IMPORTANTE CHANGE SECURE TO FALSE IF RUN LOCALLY
       res.success = user[0].email + " logged in";
       res.user = user[0];
-
+      console.log(token);
       res.status(200).json({
         user: user[0].email,
         Information: "Token was sent in a cookie named jwt",
