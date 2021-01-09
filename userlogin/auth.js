@@ -11,8 +11,8 @@ exports.auth = (req, res, next) => {
     //console.log(req.headers.authorization.split(" ")[1]);
 
     let accessToken = req.cookies.jwt;
-    console.log("accessToken", accessToken);
-    console.log(req.headers.authorization.split(" ")[1]);
+    //console.log("accessToken", accessToken);
+    // console.log(req.headers.authorization.split(" ")[1]);
     if (!accessToken) {
       accessToken = req.headers.authorization.split(" ")[1];
     }

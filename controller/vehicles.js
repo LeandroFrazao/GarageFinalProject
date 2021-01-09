@@ -45,14 +45,14 @@ module.exports = () => {
     const make = req.body.make;
     const engine = req.body.engine;
     const year = req.body.year;
-    const { result, error } = await vehicles.add(
-      vin,
-      model,
-      type,
-      make,
-      engine,
-      year
-    );
+    const { result, error } = await vehicles.add({
+      vin: vin,
+      model: model,
+      type: type,
+      make: make,
+      engine: engine,
+      year: year,
+    });
     if (error) {
       return res.status(500).json({ error });
     }

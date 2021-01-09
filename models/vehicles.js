@@ -49,12 +49,21 @@ module.exports = () => {
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
-  ////Get all vehicles from logged user "{GET} /users/vehicles/"///////////////////////
+  ////Get all vehicles from logged user "{GET} /users/{:email}/vehicles/"///////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
-  const getVehiclesByUser = async () => {
+  const getVehiclesByUser = async (email) => {
     console.log(" --- vehiclesModel.getVehiclesByUser --- ");
     try {
-      const email = auth.currentUser.userEmail; //whoever is logged is going to record automatically the email of the current user
+      // load the user's email and the type of user who is logged in.
+      let userEmail = auth.currentUser.userEmail;
+      let userType = auth.currentUser.userType;
+
+      email = email.toLowerCase();
+      //if userType is not admin, it's not possible to see other user accounts.
+      if (userType !== "admin") {
+        email = userEmail;
+      }
+
       const PIPELINE_EMAIL_VEHICLES = [
         {
           $lookup: {
@@ -68,6 +77,7 @@ module.exports = () => {
       ];
 
       const users = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
+      console.log("aqui");
       console.log(users[0]);
       if (!users[0]) {
         error = "Email (" + email + ") NOT FOUND!";
@@ -86,7 +96,7 @@ module.exports = () => {
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new vehicles to user individually "{POST} /vehicles"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
-  const add = async (vin, type, make, model, engine, year) => {
+  const add = async ({ vin, type, make, model, engine, year }) => {
     console.log(" --- vehiclesModel.add --- ");
 
     try {

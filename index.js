@@ -121,7 +121,7 @@ app.delete("/users/:email", usersController.deleteController);
 //------------> get all users
 app.get("/vehicles", accessLevel, vehiclesController.getController);
 //------------> add a vehicle
-app.post("/vehicles", accessLevel, vehiclesController.postController);
+app.post("/vehicles", vehiclesController.postController);
 //------------> get a user by VIN
 app.get("/vehicles/:id", accessLevel, vehiclesController.getByIdController);
 //------------> get a vehicle by email or user _id
