@@ -133,8 +133,10 @@ module.exports = () => {
   const deleteVehicle = async ({ email, vin }) => {
     console.log(" --- vehiclesModel.delete --- ");
     try {
+      console.log(email, vin);
       vin = vin.toUpperCase();
       email = email.toLowerCase();
+      console.log(email, vin);
       // load the user's email and the type of user who is logged in.
       let userEmail = auth.currentUser.userEmail;
       let userType = auth.currentUser.userType;
@@ -144,7 +146,6 @@ module.exports = () => {
         email = userEmail;
       }
       //pipeline to aggregate a specific user email and vin
-      email = "das";
       const PIPELINE_EMAIL_VEHICLES = [
         { $match: { email: email } },
         {

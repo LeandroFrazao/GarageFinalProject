@@ -63,8 +63,9 @@ module.exports = () => {
   ////Delete vehicle "{DELETE} /users/{:email}/vehicles"                                                      ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const deleteController = async (req, res) => {
-    const vin = req.body.vin;
     const email = req.params.email;
+    const vin = req.body.vin;
+
     const { result, error } = await vehicles.deleteVehicle({
       vin: vin,
       email: email,
