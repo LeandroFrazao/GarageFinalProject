@@ -143,6 +143,8 @@ module.exports = () => {
       if (userType !== "admin") {
         email = userEmail;
       }
+      //pipeline to aggregate a specific user email and vin
+      email = "das";
       const PIPELINE_EMAIL_VEHICLES = [
         { $match: { email: email } },
         {
@@ -169,14 +171,15 @@ module.exports = () => {
       ];
       const collection = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
 
-      //collection = await db.get(COLLECTION, { vin: id });
-      console.log(collection[0]);
       if (!collection[0]) {
+        error = "User (" + email + ") NOT FOUND!";
+        return { error: error };
+      }
+
+      if (!collection[0].vehicle[0]) {
         error = "Vehicle (" + vin + ") NOT FOUND!";
         return { error: error };
       }
-      console.log(collection[0].vehicle[0]._id);
-
       const results = await db.deleteOne(COLLECTION, {
         _id: collection[0].vehicle[0]._id,
       });
