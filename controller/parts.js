@@ -9,7 +9,7 @@ module.exports = () => {
     if (error) {
       return res.status(500).json({ error });
     }
-    res.json({ services: result });
+    res.json({ parts: result });
   };
 
   ////////////////////////////////////////////////////////////////////////////////
