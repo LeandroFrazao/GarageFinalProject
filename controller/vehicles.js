@@ -58,6 +58,31 @@ module.exports = () => {
     }
     res.json({ vehicles: result });
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Update Vehicle "{PUT} /users/{email}/vehicle/{vin}"                       ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const putUpdateVehicleController = async (req, res) => {
+    const email = req.params.email;
+    const vin = req.params.vin;
+    const model = req.body.model;
+    const type = req.body.type;
+    const make = req.body.make;
+    const engine = req.body.engine;
+    const year = req.body.year;
+    const { result, error } = await vehicles.putUpdateVehicle({
+      email: email,
+      vin: vin,
+      model: model,
+      type: type,
+      make: make,
+      engine: engine,
+      year: year,
+    });
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ result: result });
+  };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////Delete vehicle "{DELETE} /users/{:email}/vehicles"                                                      ///
@@ -81,6 +106,7 @@ module.exports = () => {
     getByIdController,
     getVehicleByEmailController,
     postController,
+    putUpdateVehicleController,
     deleteController,
   };
 };

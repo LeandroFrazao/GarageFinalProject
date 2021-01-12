@@ -78,9 +78,16 @@ module.exports = () => {
     }
   };
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Updated cost of a part "{PUT} /parts/{slug}"  ///
+  ////Updated  part "{PUT} /parts/{slug}"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const putUpdateCost = async (slug, cost) => {
+  const putUpdateCost = async ({
+    slug: slug,
+    partName: partName,
+    cost: cost,
+    category: category,
+    make: make,
+    model: model,
+  }) => {
     console.log(" --- partsModel.putUpdateCost --- ");
     try {
       slug = slug.toUpperCase();
@@ -91,7 +98,16 @@ module.exports = () => {
         error = "Part (" + slug + ") NOT FOUND!";
         return { error: error };
       }
-      const newValue = { $set: { cost: cost } };
+      const newValue = {
+        $set: {
+          cost: cost,
+          partName: partName,
+          cost: cost,
+          make: make,
+          model: model,
+          category: category,
+        },
+      };
       const parts = await db.update(COLLECTION, { slug }, newValue);
       return { result: parts };
     } catch (error) {

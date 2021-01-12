@@ -24,7 +24,6 @@ module.exports = () => {
         // if user use vehicle _id instead of vin,
         const vin = id.toUpperCase();
         if (ObjectID.isValid(id)) {
-          console.log(id);
           //check if object is valid
           PIPELINE_ID_OBJECT_OR_VIN = {
             //if objectID(id) is valid, so the query is going to try to find BOTH _id or VIN
@@ -77,8 +76,7 @@ module.exports = () => {
       ];
 
       const users = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
-      console.log("aqui");
-      console.log(users[0]);
+      //console.log(users[0]);
       if (!users[0]) {
         error = "Email (" + email + ") NOT FOUND!";
         return { error: error };
@@ -127,16 +125,103 @@ module.exports = () => {
       return { error: error };
     }
   };
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Update Vehicle "{PUT} /users/{email}/vehicle/{vin}"  ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const putUpdateVehicle = async ({
+    vin,
+    type,
+    make,
+    model,
+    engine,
+    year,
+    email,
+  }) => {
+    console.log(" --- vehicleModel.putUpdateVehicle --- ");
+    try {
+      vin = vin.toUpperCase();
+      email = email.toLowerCase();
+      // console.log(email, vin);
+      // load the user's email and the type of user who is logged in.
+      let userEmail = auth.currentUser.userEmail;
+      let userType = auth.currentUser.userType;
+
+      //if userType is not admin, it's not possible to see other user accounts.
+      if (userType !== "admin") {
+        email = userEmail;
+      }
+      //pipeline to aggregate a specific user email and vin
+      const PIPELINE_EMAIL_VEHICLES = [
+        { $match: { email: email } },
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "email",
+            foreignField: "email",
+            as: "vehicle",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            vehicle: {
+              $filter: {
+                input: "$vehicle",
+                as: "vehicle",
+                cond: { $eq: ["$$vehicle.vin", vin] },
+              },
+            },
+          },
+        },
+      ];
+      const collection = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
+
+      if (!collection[0]) {
+        error = "User (" + email + ") NOT FOUND!";
+        return { error: error };
+      }
+
+      if (!collection[0].vehicle[0]) {
+        error = "Vehicle (" + vin + ") NOT FOUND!";
+        return { error: error };
+      }
+      let id = collection[0].vehicle[0]._id;
+
+      const newValue = {
+        $set: {
+          email: email,
+          vin: vin,
+          type: type,
+          make: make,
+          model: model,
+          engine: engine,
+          year: year,
+        },
+      };
+
+      const result = await db.update(
+        COLLECTION,
+        { _id: ObjectID(id) },
+        newValue
+      );
+
+      return { result: result };
+    } catch (error) {
+      return { error: error };
+    }
+  };
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////Delete vehicle "{DELETE} /users/{:email}/vehicles/"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const deleteVehicle = async ({ email, vin }) => {
     console.log(" --- vehiclesModel.delete --- ");
     try {
-      console.log(email, vin);
       vin = vin.toUpperCase();
       email = email.toLowerCase();
-      console.log(email, vin);
+      //console.log(email, vin);
       // load the user's email and the type of user who is logged in.
       let userEmail = auth.currentUser.userEmail;
       let userType = auth.currentUser.userType;
@@ -195,6 +280,7 @@ module.exports = () => {
     get,
     getVehiclesByUser,
     add,
+    putUpdateVehicle,
     deleteVehicle,
   };
 };

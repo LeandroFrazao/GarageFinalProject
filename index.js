@@ -130,6 +130,11 @@ app.get(
 
   vehiclesController.getVehicleByEmailController
 );
+//------------> Update vehicle
+app.put(
+  "/users/:email/vehicles/:vin",
+  vehiclesController.putUpdateVehicleController
+);
 //------------> delete vehicle
 app.delete("/users/:email/vehicles", vehiclesController.deleteController);
 

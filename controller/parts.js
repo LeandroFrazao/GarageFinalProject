@@ -51,7 +51,18 @@ module.exports = () => {
   const putUpdateCostController = async (req, res) => {
     const slug = req.params.slug;
     const cost = req.body.cost;
-    const { result, error } = await parts.putUpdateStatus(slug, cost);
+    const partName = req.body.partName;
+    const category = req.body.category;
+    const make = req.body.make;
+    const model = req.body.model;
+    const { result, error } = await parts.putUpdateStatus({
+      slug: slug,
+      partName: partName,
+      cost: cost,
+      category: category,
+      make: make,
+      model: model,
+    });
     if (error) {
       return res.status(500).json({ error });
     }
