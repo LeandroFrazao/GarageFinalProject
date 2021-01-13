@@ -55,7 +55,7 @@ module.exports = () => {
 
     try {
       let slug = category.substr(0, 4) + make.substr(0, 4) + "-" + model;
-      slug = slug.toLocaleUpperCase();
+      slug = slug.toUpperCase();
       //check if serviceId was already registered
       const parts = await db.get(COLLECTION, { slug: slug });
 
@@ -80,7 +80,7 @@ module.exports = () => {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////Updated  part "{PUT} /parts/{slug}"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const putUpdateCost = async ({
+  const putUpdatePart = async ({
     slug: slug,
     partName: partName,
     cost: cost,
@@ -90,7 +90,8 @@ module.exports = () => {
   }) => {
     console.log(" --- partsModel.putUpdateCost --- ");
     try {
-      slug = slug.toUpperCase();
+      let newSlug = category.substr(0, 4) + make.substr(0, 4) + "-" + model;
+      newSlug = newSlug.toUpperCase();
 
       let part = null;
       part = await db.get(COLLECTION, { slug: slug });
@@ -100,6 +101,7 @@ module.exports = () => {
       }
       const newValue = {
         $set: {
+          slug: newSlug,
           cost: cost,
           partName: partName,
           cost: cost,
@@ -139,7 +141,7 @@ module.exports = () => {
   return {
     get,
     add,
-    putUpdateCost,
+    putUpdatePart,
     deletePart,
   };
 };

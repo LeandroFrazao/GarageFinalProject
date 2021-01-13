@@ -48,14 +48,14 @@ module.exports = () => {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////Updated the cost of a part "{PUT} /parts/{slug}"                                                 ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const putUpdateCostController = async (req, res) => {
+  const putUpdatePartController = async (req, res) => {
     const slug = req.params.slug;
     const cost = req.body.cost;
     const partName = req.body.partName;
     const category = req.body.category;
     const make = req.body.make;
     const model = req.body.model;
-    const { result, error } = await parts.putUpdateStatus({
+    const { result, error } = await parts.putUpdatePart({
       slug: slug,
       partName: partName,
       cost: cost,
@@ -84,7 +84,7 @@ module.exports = () => {
     getController,
     getByIdController,
     postController,
-    putUpdateCostController,
+    putUpdatePartController,
     deleteController,
   };
 };

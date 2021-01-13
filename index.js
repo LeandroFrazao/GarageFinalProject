@@ -199,6 +199,8 @@ app.get("/parts", partsController.getController);
 app.post("/parts", accessLevel, partsController.postController);
 //------------> get a part by slug
 app.get("/parts/:id", partsController.getByIdController);
+//------------> get a part by slug
+app.put("/parts/:slug", partsController.putUpdatePartController);
 //------------> delete
 app.delete("/parts/:slug", accessLevel, partsController.deleteController);
 
