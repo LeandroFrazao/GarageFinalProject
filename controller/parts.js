@@ -27,13 +27,13 @@ module.exports = () => {
   /////Add new parts  "{POST} /services"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
   const postController = async (req, res) => {
-    const name = req.body.partName;
+    const partName = req.body.partName;
     const cost = req.body.cost;
     const category = req.body.category;
     const make = req.body.make;
     const model = req.body.model;
     const { result, error } = await parts.add(
-      name,
+      partName,
       cost,
       category,
       make,

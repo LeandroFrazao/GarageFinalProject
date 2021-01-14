@@ -50,12 +50,20 @@ module.exports = () => {
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new parts  "{POST} /parts"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
-  const add = async (name, cost, category, make, model) => {
+  const add = async (partName, cost, category, make, model) => {
     console.log(" --- partsModel.add --- ");
 
     try {
-      let slug = category.substr(0, 4) + make.substr(0, 4) + "-" + model;
+      let slug =
+        category.substr(0, 2) +
+        category.substr(3, 1) +
+        make.substr(0, 3) +
+        partName.substr(0, 1) +
+        partName.substr(2, 1) +
+        "-" +
+        model.substr(0, 4);
       slug = slug.toUpperCase();
+      console.log(slug);
       //check if serviceId was already registered
       const parts = await db.get(COLLECTION, { slug: slug });
 
@@ -66,7 +74,7 @@ module.exports = () => {
 
       const results = await db.add(COLLECTION, {
         slug: slug,
-        partName: name,
+        partName: partName,
         cost: cost,
         make: make,
         model: model,
@@ -90,15 +98,30 @@ module.exports = () => {
   }) => {
     console.log(" --- partsModel.putUpdateCost --- ");
     try {
-      let newSlug = category.substr(0, 4) + make.substr(0, 4) + "-" + model;
+      let newSlug =
+        category.substr(0, 2) +
+        category.substr(3, 1) +
+        make.substr(0, 3) +
+        partName.substr(0, 1) +
+        partName.substr(2, 1) +
+        "-" +
+        model.substr(0, 4);
       newSlug = newSlug.toUpperCase();
 
       let part = null;
-      part = await db.get(COLLECTION, { slug: slug });
+      part = await db.get(COLLECTION, {
+        $or: [{ slug: slug }, { slug: newSlug }],
+      });
+      console.log("aqui");
+      console.log(part);
       if (!part[0]) {
         error = "Part (" + slug + ") NOT FOUND!";
         return { error: error };
+      } else if (part.length > 1) {
+        error = "Can't Update, Part (" + newSlug + ") already exist.";
+        return { error: error };
       }
+
       const newValue = {
         $set: {
           slug: newSlug,
