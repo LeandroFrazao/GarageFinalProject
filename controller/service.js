@@ -43,14 +43,39 @@ module.exports = () => {
     const status = req.body.status;
     const description = req.body.description;
     const staff = req.body.staff;
-    const service = req.body.service;
+    const serviceType = req.body.serviceType;
     const { result, error } = await services.add(
       vin,
       status,
       description,
       staff,
-      service
+      serviceType
     );
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ services: result });
+  };
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Updated service for user "{PUT} /users/{email}/service/{serviceId}                          ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const putUpdateServiceController = async (req, res) => {
+    const serviceId = req.params.serviceId;
+    const email = req.params.email;
+    const vin = req.body.vin;
+    const status = req.body.status;
+    const description = req.body.description;
+    const serviceType = req.body.serviceType;
+
+    const { result, error } = await services.putUpdateService({
+      serviceId: serviceId,
+      email: email,
+      vin: vin,
+      status: status,
+      description: description,
+      serviceType: serviceType,
+    });
     if (error) {
       return res.status(500).json({ error });
     }
@@ -71,11 +96,15 @@ module.exports = () => {
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Delete service "{DELETE} /service/{serviceId}"                                                      ///
+  ////Delete service "{DELETE} /users/{email}/service/{serviceId}"                                                      ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const deleteController = async (req, res) => {
-    const id = req.params.serviceId;
-    const { result, error } = await services.deleteService(id);
+    const serviceId = req.params.serviceId;
+    const email = req.params.email;
+    const { result, error } = await services.deleteService({
+      serviceId: serviceId,
+      email: email,
+    });
     if (error) {
       return res.status(500).json({ error });
     }
@@ -87,6 +116,7 @@ module.exports = () => {
     getByIdController,
     getServiceByEmailController,
     postController,
+    putUpdateServiceController,
     putUpdateStatusController,
     deleteController,
   };

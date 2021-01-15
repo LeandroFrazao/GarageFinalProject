@@ -142,13 +142,19 @@ app.delete("/users/:email/vehicles", vehiclesController.deleteController);
 /////         service                                            ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all services
-app.get("/service", serviceController.getController);
+app.get("/service", accessLevel, serviceController.getController);
 //------------> get a service by serviceId
-app.get("/service/:id", serviceController.getByIdController);
+app.get("/service/:id", accessLevel, serviceController.getByIdController);
 //------------> get services by email
 app.get("/users/:email/service", serviceController.getServiceByEmailController);
 //------------> add an service
 app.post("/service", serviceController.postController);
+
+//------------> update service
+app.put(
+  "/users/:email/service/:serviceId/",
+  serviceController.putUpdateServiceController
+);
 
 //------------> change status of service
 app.put(
@@ -157,7 +163,10 @@ app.put(
   serviceController.putUpdateStatusController
 );
 //------------> delete
-app.delete("/service/:serviceId", serviceController.deleteController);
+app.delete(
+  "/users/:email/service/:serviceId",
+  serviceController.deleteController
+);
 
 //////////////////////////////////////////////////////////////////////////////////
 /////         invoice                                            ////////////////
@@ -199,8 +208,8 @@ app.get("/parts", partsController.getController);
 app.post("/parts", accessLevel, partsController.postController);
 //------------> get a part by slug
 app.get("/parts/:id", partsController.getByIdController);
-//------------> get a part by slug
-app.put("/parts/:slug", partsController.putUpdatePartController);
+//------------> update a part by slug
+app.put("/parts/:slug", accessLevel, partsController.putUpdatePartController);
 //------------> delete
 app.delete("/parts/:slug", accessLevel, partsController.deleteController);
 

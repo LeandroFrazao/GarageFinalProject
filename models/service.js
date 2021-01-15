@@ -95,7 +95,7 @@ module.exports = () => {
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new services to user individually "{POST} /services"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
-  const add = async (vin, status, description, staff, service) => {
+  const add = async (vin, status, description, serviceType, date_in) => {
     console.log(" --- servicesModel.add --- ");
     try {
       // load the user's email and the type of user who is logged in.
@@ -103,10 +103,14 @@ module.exports = () => {
 
       vin = vin.toUpperCase();
       const date = new Date();
-      const date_in =
+      /* const date_in =
         date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-      let serviceId =
-        vin + "_" + date.getDate() + (date.getMonth() + 1) + date.getFullYear();
+        let serviceId =
+        vin + "_" + date.getDate() + (date.getMonth() + 1) + date.getFullYear(); 
+     */
+
+      /////////////////////generate serviceId
+      let serviceId = vin + "_" + date_in;
 
       //check if serviceId was already registered
       const services = await db.get(COLLECTION, { serviceId: serviceId });
@@ -122,8 +126,8 @@ module.exports = () => {
         vin: vin,
         status: status,
         description: description,
-        staff: staff,
-        service: service,
+        staff: "",
+        serviceType: serviceType,
         date_in: date_in,
       });
       return { result: results.result };
@@ -133,9 +137,87 @@ module.exports = () => {
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Updated the status of a service "{PUT} /service/{serviceId}/{STATUS}"  ///
+  ////Updated service for user "{PUT} /users/{email}/service/{serviceId}/"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const putUpdateStatus = async (serviceId, status) => {
+  const putUpdateService = async ({
+    serviceId,
+    vin,
+    status,
+    description,
+    serviceType,
+    date_in,
+  }) => {
+    console.log(" --- serviceModel.putUpdateStatus --- ");
+    try {
+      serviceId = serviceId.toUpperCase();
+
+      // load the user's email and the type of user who is logged in.
+      let userEmail = auth.currentUser.userEmail;
+      let userType = auth.currentUser.userType;
+
+      email = email.toLowerCase();
+      //if userType is not admin, it's not possible to see other user accounts.
+      if (userType !== "admin") {
+        email = userEmail;
+      }
+      const PIPELINE_EMAIL_SERVICES = [
+        { $match: { email: email } },
+        {
+          $lookup: {
+            from: "services",
+            localField: "email",
+            foreignField: "email",
+            as: "service",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            vehicle: {
+              $filter: {
+                input: "$service",
+                as: "service",
+                cond: { $eq: ["$$service.serviceId", serviceId] },
+              },
+            },
+          },
+        },
+      ];
+
+      const collection = await db.aggregate("users", PIPELINE_EMAIL_SERVICES);
+
+      console.log(collection);
+
+      let service = null;
+      service = await db.get(COLLECTION, { serviceId: serviceId });
+      if (!service[0]) {
+        error = "Service ID (" + serviceId + ") NOT FOUND!";
+        return { error: error };
+      }
+
+      const newValue = {
+        $set: {
+          serviceId: serviceId,
+          vin: vin,
+          status: status,
+          description: description,
+          staff: staff,
+          serviceType: serviceType,
+          date_in: date_in,
+        },
+      };
+      const services = await db.update(COLLECTION, { serviceId }, newValue);
+      return { result: services };
+    } catch (error) {
+      return { error: error };
+    }
+  };
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////Updated the status of a service "{PUT} /service/{serviceId}/{STATUS}"  ///(admin)
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const putUpdateStatus = async ({ serviceId, status, staff }) => {
     console.log(" --- serviceModel.putUpdateStatus --- ");
     try {
       serviceId = serviceId.toUpperCase();
@@ -160,21 +242,21 @@ module.exports = () => {
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Delete service "{DELETE} /service/{serviceId}"  ///
+  ////Delete service "{DELETE} /users/{email}/service/{serviceId}"  ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const deleteService = async (id) => {
+  const deleteService = async ({ serviceId, email }) => {
     console.log(" --- serviceModel.delete --- ");
     try {
-      id = id.toUpperCase();
+      serviceId = serviceId.toUpperCase();
 
       let collection = null;
-      collection = await db.get(COLLECTION, { serviceId: id });
+      collection = await db.get(COLLECTION, { serviceId: serviceId });
       if (!collection[0]) {
-        error = "Service (" + id + ") NOT FOUND!";
+        error = "Service (" + serviceId + ") NOT FOUND!";
         return { error: error };
       }
-      const results = await db.deleteOne(COLLECTION, { serviceId: id });
-      console.log("Service " + id + " DELETED");
+      const results = await db.deleteOne(COLLECTION, { serviceId: serviceId });
+      console.log("Service " + serviceId + " DELETED");
       return { result: results };
     } catch (error) {
       return { error: error };
@@ -186,6 +268,7 @@ module.exports = () => {
     getServicesByUser,
     add,
     putUpdateStatus,
+    putUpdateService,
     deleteService,
   };
 };
