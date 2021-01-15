@@ -54,16 +54,36 @@ module.exports = () => {
     console.log(" --- partsModel.add --- ");
 
     try {
-      let slug =
-        category.substr(0, 2) +
-        category.substr(3, 1) +
-        make.substr(0, 3) +
-        partName.substr(0, 1) +
-        partName.substr(2, 1) +
-        "-" +
-        model.substr(0, 4);
+      // to create a slug, first it is removed the spaces from the string
+      let slugCategory = category.trim().replace(/ /g, "");
+      let slugPartName = partName.trim().replace(/ /g, "");
+      let slugModel = model.trim().replace(/ /g, "");
+      let slugMake = make.trim().replace(/ /g, "");
+
+      // then for each element is selected a substring, to be pushed in one string to be the Slug of the part/service
+      slugCategory =
+        slugCategory.length < 6
+          ? slugCategory.substr(0, 2) + slugCategory.substr(3, 1)
+          : slugCategory.substr(0, 2) +
+            slugCategory.substr(3, 1) +
+            slugCategory.substr(5, 1) +
+            slugCategory.substr(7, 1);
+
+      slugPartName =
+        slugPartName.length < 6
+          ? slugPartName.substr(0, 1) + slugPartName.substr(2, 1)
+          : slugPartName.substr(0, 1) +
+            slugPartName.substr(2, 1) +
+            slugPartName.substr(5, 1) +
+            slugPartName.substr(7, 1);
+
+      slugMake = slugMake.substr(0, 3);
+      slugModel = slugModel.substr(0, 4);
+
+      let slug = slugCategory + slugMake + slugPartName + "-" + slugModel;
+
       slug = slug.toUpperCase();
-      console.log(slug);
+      // console.log(slug);
       //check if serviceId was already registered
       const parts = await db.get(COLLECTION, { slug: slug });
 
@@ -98,21 +118,38 @@ module.exports = () => {
   }) => {
     console.log(" --- partsModel.putUpdateCost --- ");
     try {
-      let newSlug =
-        category.substr(0, 2) +
-        category.substr(3, 1) +
-        make.substr(0, 3) +
-        partName.substr(0, 1) +
-        partName.substr(2, 1) +
-        "-" +
-        model.substr(0, 4);
+      let slugCategory = category.trim().replace(/ /g, "");
+      let slugPartName = partName.trim().replace(/ /g, "");
+      let slugModel = model.trim().replace(/ /g, "");
+      let slugMake = make.trim().replace(/ /g, "");
+
+      slugCategory =
+        slugCategory.length < 6
+          ? slugCategory.substr(0, 2) + slugCategory.substr(3, 1)
+          : slugCategory.substr(0, 2) +
+            slugCategory.substr(3, 1) +
+            slugCategory.substr(5, 1) +
+            slugCategory.substr(7, 1);
+
+      slugPartName =
+        slugPartName.length < 6
+          ? slugPartName.substr(0, 1) + slugPartName.substr(2, 1)
+          : slugPartName.substr(0, 1) +
+            slugPartName.substr(2, 1) +
+            slugPartName.substr(5, 1) +
+            slugPartName.substr(7, 1);
+
+      slugMake = slugMake.substr(0, 3);
+      slugModel = slugModel.substr(0, 4);
+
+      let newSlug = slugCategory + slugMake + slugPartName + "-" + slugModel;
+
       newSlug = newSlug.toUpperCase();
 
       let part = null;
       part = await db.get(COLLECTION, {
         $or: [{ slug: slug }, { slug: newSlug }],
       });
-      console.log("aqui");
       console.log(part);
       if (!part[0]) {
         error = "Part (" + slug + ") NOT FOUND!";
