@@ -147,6 +147,9 @@ app.get("/service", accessLevel, serviceController.getController);
 app.get("/service/:id", accessLevel, serviceController.getByIdController);
 //------------> get services by email
 app.get("/users/:email/service", serviceController.getServiceByEmailController);
+//------------> get bookings
+app.get("/users/service/bookings", serviceController.getBookingsController);
+
 //------------> add an service
 app.post("/service", serviceController.postController);
 
@@ -158,7 +161,7 @@ app.put(
 
 //------------> change status of service
 app.put(
-  "/service/:serviceId/:status",
+  "/users/:email/service/:serviceId/:status",
   accessLevel,
   serviceController.putUpdateStatusController
 );

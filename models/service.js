@@ -75,17 +75,9 @@ module.exports = () => {
           },
         },
       ];
-      const PIPELINE_EMAIL_BOOKINGS = [
-        {
-          $group: {
-            _id: "$date_in",
-            count: { $sum: 1 },
-          },
-        },
-      ];
 
       const users = await db.aggregate("users", PIPELINE_EMAIL_SERVICES);
-      console.log(users[0]);
+
       if (!users[0]) {
         error = "Email (" + email + ") NOT FOUND!";
         return { error: error };
@@ -100,25 +92,105 @@ module.exports = () => {
     }
   };
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  ////Group bookings  and count them "{GET} /users/service/bookings "   ////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  const getBookings = async () => {
+    console.log(" --- servicesModel.getBookings --- ");
+    try {
+      const PIPELINE_GROUP_ALL_BOOKINGS = [
+        {
+          $group: {
+            _id: { date_in: "$date_in", serviceType: "$serviceType" },
+            count: {
+              $sum: {
+                $cond: [{ $eq: ["$serviceType", "Major Repair"] }, 2, 1],
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.date_in",
+            services: {
+              $push: {
+                serviceType: "$_id.serviceType",
+                countTypeService: "$count",
+              },
+            },
+            count: { $sum: "$count" },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 30 },
+      ];
+
+      const bookings = await db.aggregate(
+        COLLECTION,
+        PIPELINE_GROUP_ALL_BOOKINGS
+      );
+      console.log(bookings[0]);
+      if (!bookings[0]) {
+        error = "NO BOOKINGS FOUND!";
+        return { error: error };
+      }
+
+      return { result: bookings };
+    } catch (error) {
+      return { error: error };
+    }
+  };
+
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new services to user individually "{POST} /services"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
-  const add = async (vin, status, description, serviceType, date_in) => {
+  const add = async ({ vin, status, description, serviceType, date_in }) => {
     console.log(" --- servicesModel.add --- ");
     try {
       // load the user's email and the type of user who is logged in.
       let userEmail = auth.currentUser.userEmail;
-
       vin = vin.toUpperCase();
-      const date = new Date();
-      /* const date_in =
-        date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-        let serviceId =
-        vin + "_" + date.getDate() + (date.getMonth() + 1) + date.getFullYear(); 
-     */
+
+      const PIPELINE_GROUP_BOOKINGS_BY_DATE = [
+        { $match: { date_in: date_in } },
+        {
+          $group: {
+            _id: { date_in: "$date_in", serviceType: "$serviceType" },
+            count: {
+              $sum: {
+                $cond: [{ $eq: ["$serviceType", "Major Repair"] }, 2, 1],
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.date_in",
+            services: {
+              $push: {
+                serviceType: "$_id.serviceType",
+                countTypeService: "$count",
+              },
+            },
+            count: { $sum: "$count" },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 30 },
+      ];
+
+      const bookings = await db.aggregate(
+        "service",
+        PIPELINE_GROUP_BOOKINGS_BY_DATE
+      );
+      console.log(bookings[0].count);
+      if (bookings[0] && bookings[0].count > 3) {
+        error = "No Booking available for this date (" + date_in + ")";
+        return { error: error };
+      }
 
       /////////////////////generate serviceId
-      let serviceId = vin + "_" + date_in;
+      let serviceId = vin + "_" + date_in.replace(/-/g, "");
 
       //check if serviceId was already registered
       const services = await db.get(COLLECTION, { serviceId: serviceId });
@@ -154,11 +226,13 @@ module.exports = () => {
     description,
     serviceType,
     date_in,
+    email,
   }) => {
-    console.log(" --- serviceModel.putUpdateStatus --- ");
+    console.log(" --- serviceModel.putUpdateService --- ");
     try {
       serviceId = serviceId.toUpperCase();
 
+      let newServiceId = vin + date_in.replace(/-/g, "");
       // load the user's email and the type of user who is logged in.
       let userEmail = auth.currentUser.userEmail;
       let userType = auth.currentUser.userType;
@@ -168,11 +242,12 @@ module.exports = () => {
       if (userType !== "admin") {
         email = userEmail;
       }
-      const PIPELINE_EMAIL_SERVICES = [
+
+      const PIPELINE_USER_SERVICES = [
         { $match: { email: email } },
         {
           $lookup: {
-            from: "services",
+            from: "service",
             localField: "email",
             foreignField: "email",
             as: "service",
@@ -182,7 +257,7 @@ module.exports = () => {
           $project: {
             _id: 1,
             name: 1,
-            vehicle: {
+            service: {
               $filter: {
                 input: "$service",
                 as: "service",
@@ -193,29 +268,84 @@ module.exports = () => {
         },
       ];
 
-      const collection = await db.aggregate("users", PIPELINE_EMAIL_SERVICES);
-
-      console.log(collection);
-
-      let service = null;
-      service = await db.get(COLLECTION, { serviceId: serviceId });
-      if (!service[0]) {
+      const collection = await db.aggregate("users", PIPELINE_USER_SERVICES);
+      if (!collection[0].service[0]) {
         error = "Service ID (" + serviceId + ") NOT FOUND!";
+        return { error: error };
+      }
+      let service = null;
+      service = await db.get(COLLECTION, {
+        $or: [{ serviceId: serviceId }, { serviceId: newServiceId }],
+      });
+
+      if (!service[0]) {
+        error = "Service (" + serviceId + ") NOT FOUND!";
+        return { error: error };
+      } else if (service.length > 1) {
+        error = "Error: Service (" + newServiceId + ") is already Booked.";
+        return { error: error };
+      }
+
+      const PIPELINE_GROUP_BOOKINGS_BY_DATE = [
+        { $match: { date_in: date_in } },
+        {
+          $group: {
+            _id: { date_in: "$date_in", serviceType: "$serviceType" },
+            count: {
+              $sum: {
+                $cond: [{ $eq: ["$serviceType", "Major Repair"] }, 2, 1],
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.date_in",
+            services: {
+              $push: {
+                serviceType: "$_id.serviceType",
+                countTypeService: "$count",
+              },
+            },
+            count: { $sum: "$count" },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 30 },
+      ];
+
+      const bookings = await db.aggregate(
+        "service",
+        PIPELINE_GROUP_BOOKINGS_BY_DATE
+      );
+      console.log(bookings[0].count);
+      if (
+        bookings[0] &&
+        bookings[0].count > 4 &&
+        date_in !== collection[0].service[0].date_in
+      ) {
+        error = "No Booking available for this date (" + date_in + ")";
         return { error: error };
       }
 
       const newValue = {
         $set: {
-          serviceId: serviceId,
+          serviceId: newServiceId,
           vin: vin,
           status: status,
           description: description,
-          staff: staff,
+
           serviceType: serviceType,
           date_in: date_in,
         },
       };
-      const services = await db.update(COLLECTION, { serviceId }, newValue);
+      let id = collection[0].service[0]._id;
+
+      const services = await db.update(
+        COLLECTION,
+        { _id: ObjectID(id) },
+        newValue
+      );
       return { result: services };
     } catch (error) {
       return { error: error };
@@ -223,26 +353,73 @@ module.exports = () => {
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Updated the status of a service "{PUT} /service/{serviceId}/{STATUS}"  ///(admin)
+  ////Updated the status of a service "{PUT} /users/{email}/service/{serviceId}/{STATUS}"  ///(admin)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const putUpdateStatus = async ({ serviceId, status, staff }) => {
+  const putUpdateStatus = async ({ serviceId, status, staff, email }) => {
     console.log(" --- serviceModel.putUpdateStatus --- ");
     try {
       serviceId = serviceId.toUpperCase();
 
-      let service = null;
-      service = await db.get(COLLECTION, { serviceId: serviceId });
-      if (!service[0]) {
+      email = email.toLowerCase();
+
+      const PIPELINE_USER_SERVICES = [
+        { $match: { email: email } },
+        {
+          $lookup: {
+            from: "service",
+            localField: "email",
+            foreignField: "email",
+            as: "service",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            service: {
+              $filter: {
+                input: "$service",
+                as: "service",
+                cond: { $eq: ["$$service.serviceId", serviceId] },
+              },
+            },
+          },
+        },
+      ];
+
+      const collection = await db.aggregate("users", PIPELINE_USER_SERVICES);
+      if (!collection[0].service[0]) {
         error = "Service ID (" + serviceId + ") NOT FOUND!";
         return { error: error };
       }
 
+      let service = null;
+      service = await db.get(COLLECTION, {
+        serviceId: serviceId,
+      });
+      console.log(service);
+
+      if (!service[0]) {
+        error = "Service (" + serviceId + ") NOT FOUND!";
+        return { error: error };
+      } else if (service.length > 1) {
+        error = "Error: Service (" + newServiceId + ") is already Booked.";
+        return { error: error };
+      }
+      console.log(service);
       const newValue = {
         $set: {
           status: status,
+          staff: staff,
         },
       };
-      const services = await db.update(COLLECTION, { serviceId }, newValue);
+      let id = collection[0].service[0]._id;
+
+      const services = await db.update(
+        COLLECTION,
+        { _id: ObjectID(id) },
+        newValue
+      );
       return { result: services };
     } catch (error) {
       return { error: error };
@@ -257,13 +434,39 @@ module.exports = () => {
     try {
       serviceId = serviceId.toUpperCase();
 
-      let collection = null;
-      collection = await db.get(COLLECTION, { serviceId: serviceId });
-      if (!collection[0]) {
-        error = "Service (" + serviceId + ") NOT FOUND!";
+      const PIPELINE_USER_SERVICES = [
+        { $match: { email: email } },
+        {
+          $lookup: {
+            from: "service",
+            localField: "email",
+            foreignField: "email",
+            as: "service",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            service: {
+              $filter: {
+                input: "$service",
+                as: "service",
+                cond: { $eq: ["$$service.serviceId", serviceId] },
+              },
+            },
+          },
+        },
+      ];
+
+      const collection = await db.aggregate("users", PIPELINE_USER_SERVICES);
+      if (!collection[0].service[0]) {
+        error = "Service  (" + serviceId + ") NOT FOUND!";
         return { error: error };
       }
-      const results = await db.deleteOne(COLLECTION, { serviceId: serviceId });
+
+      let id = collection[0].service[0]._id;
+      const results = await db.deleteOne(COLLECTION, { _id: ObjectID(id) });
       console.log("Service " + serviceId + " DELETED");
       return { result: results };
     } catch (error) {
@@ -274,6 +477,7 @@ module.exports = () => {
   return {
     get,
     getServicesByUser,
+    getBookings,
     add,
     putUpdateStatus,
     putUpdateService,

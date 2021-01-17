@@ -34,6 +34,16 @@ module.exports = () => {
     }
     res.json({ users: result });
   };
+  ///////////////////////////////////////////////////////////////////////////////////////////////
+  ////Get all services for an user "{GET} /service/bookings"///////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  const getBookingsController = async (req, res) => {
+    const { result, error } = await services.getBookings();
+    if (error) {
+      return res.status(500).json({ error });
+    }
+    res.json({ results: result });
+  };
 
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new service to an user individually "{POST} /services"////////////
@@ -44,13 +54,15 @@ module.exports = () => {
     const description = req.body.description;
     const staff = req.body.staff;
     const serviceType = req.body.serviceType;
-    const { result, error } = await services.add(
-      vin,
-      status,
-      description,
-      staff,
-      serviceType
-    );
+    const date_in = req.body.date_in;
+    const { result, error } = await services.add({
+      vin: vin,
+      status: status,
+      description: description,
+      staff: staff,
+      serviceType: serviceType,
+      date_in: date_in,
+    });
     if (error) {
       return res.status(500).json({ error });
     }
@@ -67,7 +79,7 @@ module.exports = () => {
     const status = req.body.status;
     const description = req.body.description;
     const serviceType = req.body.serviceType;
-
+    const date_in = req.body.date_in;
     const { result, error } = await services.putUpdateService({
       serviceId: serviceId,
       email: email,
@@ -75,6 +87,7 @@ module.exports = () => {
       status: status,
       description: description,
       serviceType: serviceType,
+      date_in: date_in,
     });
     if (error) {
       return res.status(500).json({ error });
@@ -83,12 +96,19 @@ module.exports = () => {
   };
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Updated the status of a service "{PUT} /service/{serviceId}/{STATUS}"                          ///
+  ////Updated the status of a service "{PUT} /users/{email}/service/{serviceId}/{STATUS}"                          ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const putUpdateStatusController = async (req, res) => {
     const serviceId = req.params.serviceId;
+    const email = req.params.email;
     const status = req.params.status;
-    const { result, error } = await services.putUpdateStatus(serviceId, status);
+    const staff = req.body.staff;
+    const { result, error } = await services.putUpdateStatus({
+      serviceId: serviceId,
+      status: status,
+      staff: staff,
+      email: email,
+    });
     if (error) {
       return res.status(500).json({ error });
     }
@@ -115,6 +135,7 @@ module.exports = () => {
     getController,
     getByIdController,
     getServiceByEmailController,
+    getBookingsController,
     postController,
     putUpdateServiceController,
     putUpdateStatusController,
