@@ -65,6 +65,7 @@ module.exports = () => {
       }
 
       const PIPELINE_EMAIL_SERVICES = [
+        { $match: { email: email } },
         {
           $lookup: {
             from: "service",
@@ -73,7 +74,14 @@ module.exports = () => {
             as: "services",
           },
         },
-        { $match: { email: email } },
+      ];
+      const PIPELINE_EMAIL_BOOKINGS = [
+        {
+          $group: {
+            _id: "$date_in",
+            count: { $sum: 1 },
+          },
+        },
       ];
 
       const users = await db.aggregate("users", PIPELINE_EMAIL_SERVICES);
