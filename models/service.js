@@ -97,8 +97,18 @@ module.exports = () => {
   /////////////////////////////////////////////////////////////////////////////////////////////
   const getBookings = async () => {
     console.log(" --- servicesModel.getBookings --- ");
+
     try {
+      let currentDate = new Date().toISOString().substr(0, 10);
+      //pipeline to get results from the current date, then group serviceType by date, and each serviceType is counted, but for major repairs, it is counted by 2.
       const PIPELINE_GROUP_ALL_BOOKINGS = [
+        {
+          $match: {
+            date_in: {
+              $gte: currentDate,
+            },
+          },
+        },
         {
           $group: {
             _id: { date_in: "$date_in", serviceType: "$serviceType" },
@@ -121,7 +131,7 @@ module.exports = () => {
             count: { $sum: "$count" },
           },
         },
-        { $sort: { count: -1 } },
+        { $sort: { _id: 1 } },
         { $limit: 30 },
       ];
 
@@ -150,7 +160,7 @@ module.exports = () => {
       // load the user's email and the type of user who is logged in.
       let userEmail = auth.currentUser.userEmail;
       vin = vin.toUpperCase();
-
+      console.log(vin, status, description, serviceType, date_in);
       const PIPELINE_GROUP_BOOKINGS_BY_DATE = [
         { $match: { date_in: date_in } },
         {
@@ -183,7 +193,7 @@ module.exports = () => {
         "service",
         PIPELINE_GROUP_BOOKINGS_BY_DATE
       );
-      console.log(bookings[0].count);
+      console.log(bookings[0] && bookings[0].count);
       if (bookings[0] && bookings[0].count > 3) {
         error = "No Booking available for this date (" + date_in + ")";
         return { error: error };
@@ -286,6 +296,7 @@ module.exports = () => {
         return { error: error };
       }
 
+      //pipeline to return a specific date and its the count of bookins.
       const PIPELINE_GROUP_BOOKINGS_BY_DATE = [
         { $match: { date_in: date_in } },
         {
@@ -319,9 +330,10 @@ module.exports = () => {
         PIPELINE_GROUP_BOOKINGS_BY_DATE
       );
       console.log(bookings[0].count);
+      // check the number of bookings for a specific day, if it is over 4.
       if (
         bookings[0] &&
-        bookings[0].count > 4 &&
+        bookings[0].count > 3 &&
         date_in !== collection[0].service[0].date_in
       ) {
         error = "No Booking available for this date (" + date_in + ")";

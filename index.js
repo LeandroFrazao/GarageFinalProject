@@ -150,7 +150,7 @@ app.get("/users/:email/service", serviceController.getServiceByEmailController);
 //------------> get bookings
 app.get("/users/service/bookings", serviceController.getBookingsController);
 
-//------------> add an service
+//------------> add a service
 app.post("/service", serviceController.postController);
 
 //------------> update service
