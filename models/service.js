@@ -193,9 +193,20 @@ module.exports = () => {
         "service",
         PIPELINE_GROUP_BOOKINGS_BY_DATE
       );
+
       console.log(bookings[0] && bookings[0].count);
       if (bookings[0] && bookings[0].count > 3) {
         error = "No Booking available for this date (" + date_in + ")";
+        return { error: error };
+      } else if (
+        bookings[0] &&
+        bookings[0].count == 3 &&
+        serviceType == "Major Repair"
+      ) {
+        error =
+          "It's not possible to book Major Repair for this date (" +
+          date_in +
+          "). Pick another day.";
         return { error: error };
       }
 
@@ -252,7 +263,7 @@ module.exports = () => {
       if (userType !== "admin") {
         email = userEmail;
       }
-
+      console.log(serviceId);
       const PIPELINE_USER_SERVICES = [
         { $match: { email: email } },
         {
@@ -279,6 +290,11 @@ module.exports = () => {
       ];
 
       const collection = await db.aggregate("users", PIPELINE_USER_SERVICES);
+
+      if (!collection[0]) {
+        error = "User (" + email + ") NOT FOUND!";
+        return { error: error };
+      }
       if (!collection[0].service[0]) {
         error = "Service ID (" + serviceId + ") NOT FOUND!";
         return { error: error };
@@ -326,10 +342,10 @@ module.exports = () => {
       ];
 
       const bookings = await db.aggregate(
-        "service",
+        COLLECTION,
         PIPELINE_GROUP_BOOKINGS_BY_DATE
       );
-      console.log(bookings[0].count);
+      console.log(bookings[0] && bookings[0].count);
       // check the number of bookings for a specific day, if it is over 4.
       if (
         bookings[0] &&
@@ -337,6 +353,17 @@ module.exports = () => {
         date_in !== collection[0].service[0].date_in
       ) {
         error = "No Booking available for this date (" + date_in + ")";
+        return { error: error };
+      } else if (
+        bookings[0] &&
+        bookings[0].count == 3 &&
+        serviceId != newServiceId &&
+        serviceType == "Major Repair"
+      ) {
+        error =
+          "It's not possible to book Major Repair for this date (" +
+          date_in +
+          "). Pick another day.";
         return { error: error };
       }
 
@@ -409,7 +436,6 @@ module.exports = () => {
       service = await db.get(COLLECTION, {
         serviceId: serviceId,
       });
-      console.log(service);
 
       if (!service[0]) {
         error = "Service (" + serviceId + ") NOT FOUND!";
@@ -418,7 +444,7 @@ module.exports = () => {
         error = "Error: Service (" + newServiceId + ") is already Booked.";
         return { error: error };
       }
-      console.log(service);
+
       const newValue = {
         $set: {
           status: status,
