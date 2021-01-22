@@ -103,11 +103,17 @@ module.exports = () => {
     const email = req.params.email;
     const status = req.params.status;
     const staff = req.body.staff;
+    const vin = req.body.vin;
+    const date_in = req.body.date_in;
+    const serviceType = req.body.serviceType;
     const { result, error } = await services.putUpdateStatus({
       serviceId: serviceId,
       status: status,
       staff: staff,
       email: email,
+      vin: vin,
+      serviceType: serviceType,
+      date_in: date_in,
     });
     if (error) {
       return res.status(500).json({ error });

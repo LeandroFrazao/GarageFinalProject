@@ -373,7 +373,6 @@ module.exports = () => {
           vin: vin,
           status: status,
           description: description,
-
           serviceType: serviceType,
           date_in: date_in,
         },
@@ -394,11 +393,22 @@ module.exports = () => {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////Updated the status of a service "{PUT} /users/{email}/service/{serviceId}/{STATUS}"  ///(admin)
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
-  const putUpdateStatus = async ({ serviceId, status, staff, email }) => {
+  const putUpdateStatus = async ({
+    serviceId,
+    status,
+    staff,
+    email,
+    serviceType,
+    vin,
+    date_in,
+  }) => {
     console.log(" --- serviceModel.putUpdateStatus --- ");
     try {
+      console.log(serviceId, status, staff, email, serviceType, vin, date_in);
+
       serviceId = serviceId.toUpperCase();
 
+      let newServiceId = vin + date_in.replace(/-/g, "");
       email = email.toLowerCase();
 
       const PIPELINE_USER_SERVICES = [
@@ -427,14 +437,19 @@ module.exports = () => {
       ];
 
       const collection = await db.aggregate("users", PIPELINE_USER_SERVICES);
+      console.log(collection[0]);
+      console.log(collection[0].service);
+      if (!collection[0]) {
+        error = "User (" + email + ") NOT FOUND!";
+        return { error: error };
+      }
       if (!collection[0].service[0]) {
         error = "Service ID (" + serviceId + ") NOT FOUND!";
         return { error: error };
       }
-
       let service = null;
       service = await db.get(COLLECTION, {
-        serviceId: serviceId,
+        $or: [{ serviceId: serviceId }, { serviceId: newServiceId }],
       });
 
       if (!service[0]) {
@@ -449,6 +464,10 @@ module.exports = () => {
         $set: {
           status: status,
           staff: staff,
+          serviceId: newServiceId,
+          vin: vin,
+          serviceType,
+          date_in,
         },
       };
       let id = collection[0].service[0]._id;
