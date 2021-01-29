@@ -95,7 +95,7 @@ module.exports = () => {
   //////////////////////////////////////////////////////////////////////////////////////////
   /////Add new invoices to user individually "{POST} /invoice"////////////
   ////////////////////////////////////////////////////////////////////////////////////////
-  const add = async (serviceId) => {
+  const add = async ({ serviceId, serviceType, total }) => {
     console.log(" --- invoicesModel.add --- ");
 
     try {
@@ -109,6 +109,8 @@ module.exports = () => {
         invoiceId: count + 1,
         email: authorEmail,
         serviceId: serviceId,
+        serviceType: serviceType,
+        total: total,
         date_out: date_out,
         items: [],
       });

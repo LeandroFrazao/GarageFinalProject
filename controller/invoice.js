@@ -40,7 +40,13 @@ module.exports = () => {
   ////////////////////////////////////////////////////////////////////////////////////////
   const postController = async (req, res) => {
     const serviceId = req.body.serviceId;
-    const { result, error } = await invoices.add(serviceId);
+    const serviceType = req.body.serviceType;
+    const total = req.body.total;
+    const { result, error } = await invoices.add({
+      serviceId,
+      serviceType,
+      total,
+    });
     if (error) {
       return res.status(500).json({ error });
     }
