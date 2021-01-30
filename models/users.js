@@ -40,7 +40,7 @@ module.exports = () => {
         if (ObjectID.isValid(id)) {
           //check if object is valid
           PIPELINE_ID_OBJECT_OR_EMAIL = {
-            //if objectID(id) is valid, so the query is going to try to find BOTH _id or SLUG
+            //if objectID(id) is valid, so the query is going to try to find BOTH _id or email
             $or: [{ _id: ObjectID(id) }, { email: email }],
           };
           users = await db.get(COLLECTION, PIPELINE_ID_OBJECT_OR_EMAIL); //first try to find using _id, if it returns empty array, then try by email

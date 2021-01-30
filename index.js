@@ -28,14 +28,7 @@ const app = express();
 
 app.use("/", express.static("static")); //call the index.html in static folder
 
-///////////////////////////////////////
-//////////login         //////////////
-/////////////////////////////////////
 app.use(cors());
-app.use((req, res, next) => {
-  console.log("[%s] %s -- %s", new Date(), "Method: ", req.method, req.url);
-  next();
-});
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -44,9 +37,16 @@ app.use((req, res, next) => {
   );
   res.header("Acces-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
   res.header("Acces-Contorl-Allow-Methods", "Content-Type", "Authorization");
-
   next();
 });
+
+app.use((req, res, next) => {
+  console.log("[%s] %s -- %s", new Date(), "Method: ", req.method, req.url);
+  next();
+});
+///////////////////////////////////////
+//////////login         //////////////
+/////////////////////////////////////
 
 //app.use(express.json());   // TESTING
 app.use(cookieParser());
@@ -96,12 +96,15 @@ app.get("/verify/:randomtoken", confirmation);
 //\\                       ROUTES                                           \\\\\\\\\\\\\\\\\\\
 //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+// Check the Authorization for all the next requests
+app.use(auth);
+
 //////////////////////////////////////////////////////////////////////////////////
 /////         USERS                                              ////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //------------> get all users
-app.use(auth);
 app.get("/users", accessLevel, usersController.getController);
+
 //------------> add an user
 app.post(
   "/users",

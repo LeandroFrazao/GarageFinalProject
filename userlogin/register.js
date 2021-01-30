@@ -15,8 +15,6 @@ exports.register = async (req, res, next) => {
     console.log(res.error);
     next();
   } else {
-    //  try {
-
     var newUser = {
       name: req.body.name,
       email: req.body.email,
@@ -36,7 +34,6 @@ exports.register = async (req, res, next) => {
       //return next();
       return res.status(500).json({ error: "Email already registered." });
     }
-
     let hashKey = await userHashKey.hash(newUser.key); // call a function to hash the user key
 
     // replace a document if it was found, or create a new one.
@@ -186,7 +183,6 @@ exports.confirmation = async (req, res, next) => {
       res.status(400);
       return res.redirect("/invalid.html");
     }
-
     //console.log("user from Token: ", user[0]);
     //  after token is verified, the user account is copied from tempUsers to users collections
     const results = await db.add("users", {

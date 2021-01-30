@@ -132,7 +132,7 @@ module.exports = () => {
           },
         },
         { $sort: { _id: 1 } },
-        { $limit: 30 },
+        { $limit: 60 },
       ];
 
       const bookings = await db.aggregate(
@@ -186,7 +186,7 @@ module.exports = () => {
           },
         },
         { $sort: { count: -1 } },
-        { $limit: 30 },
+        { $limit: 60 },
       ];
 
       const bookings = await db.aggregate(
@@ -338,7 +338,7 @@ module.exports = () => {
           },
         },
         { $sort: { count: -1 } },
-        { $limit: 30 },
+        { $limit: 60 },
       ];
 
       const bookings = await db.aggregate(

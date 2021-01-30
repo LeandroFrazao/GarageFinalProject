@@ -25,7 +25,7 @@ module.exports = () => {
         const vin = id.toUpperCase();
         if (ObjectID.isValid(id)) {
           //check if object is valid
-          PIPELINE_ID_OBJECT_OR_VIN = {
+          let PIPELINE_ID_OBJECT_OR_VIN = {
             //if objectID(id) is valid, so the query is going to try to find BOTH _id or VIN
             $or: [{ _id: ObjectID(id) }, { vin: vin }],
           };
@@ -64,6 +64,7 @@ module.exports = () => {
       }
 
       const PIPELINE_EMAIL_VEHICLES = [
+        { $match: { email: email } },
         {
           $lookup: {
             from: "vehicles",
@@ -72,7 +73,6 @@ module.exports = () => {
             as: "vehicles",
           },
         },
-        { $match: { email: email } },
       ];
 
       const users = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
@@ -137,6 +137,7 @@ module.exports = () => {
     engine,
     year,
     email,
+    id,
   }) => {
     console.log(" --- vehicleModel.putUpdateVehicle --- ");
     try {
@@ -182,12 +183,15 @@ module.exports = () => {
         error = "User (" + email + ") NOT FOUND!";
         return { error: error };
       }
-
+      let _id;
       if (!collection[0].vehicle[0]) {
-        error = "Vehicle (" + vin + ") NOT FOUND!";
+        //error = "Vehicle (" + vin + ") NOT FOUND!";
+        //return { error: error };
+        _id = id;
+      } else if (collection[0].vehicle[0]._id == id) {
+        error = "Another Vehicle with same (" + vin + ") FOUND!";
         return { error: error };
-      }
-      let id = collection[0].vehicle[0]._id;
+      } else _id = collection[0].vehicle[0]._id;
 
       const newValue = {
         $set: {

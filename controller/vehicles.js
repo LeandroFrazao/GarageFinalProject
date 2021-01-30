@@ -63,7 +63,8 @@ module.exports = () => {
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const putUpdateVehicleController = async (req, res) => {
     const email = req.params.email;
-    const vin = req.params.vin;
+    const id = req.params.id;
+    const vin = req.body.vin;
     const model = req.body.model;
     const type = req.body.type;
     const make = req.body.make;
@@ -77,6 +78,7 @@ module.exports = () => {
       make: make,
       engine: engine,
       year: year,
+      id: id,
     });
     if (error) {
       return res.status(500).json({ error });

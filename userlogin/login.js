@@ -65,8 +65,8 @@ exports.login = async (req, res, next) => {
       });
       // export the random the string to be used for authentication (auth.js).
       //Need to be observed that the cookie only is valid, while the user is using the API.
-      //If the user closes the browser or app that is using the api, this variable "RANDOM_TOKEN" gets UNDEFINED value.
-      //I think using this method it could improve the security instead of having a fixed server string
+      //If the user closes the browser or app that is using the api, and try to login again, this variable "RANDOM_TOKEN" changes.
+      //I think using this method it could improve the security instead of having a fixed public key.
       module.exports.RANDOM_TOKEN = RANDOM_TOKEN;
       res.send();
     } catch (error) {
