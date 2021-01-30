@@ -184,11 +184,14 @@ module.exports = () => {
         return { error: error };
       }
       let _id;
+      console.log(id);
+
+      console.log(collection[0].vehicle[0]);
       if (!collection[0].vehicle[0]) {
         //error = "Vehicle (" + vin + ") NOT FOUND!";
         //return { error: error };
         _id = id;
-      } else if (collection[0].vehicle[0]._id == id) {
+      } else if (collection[0].vehicle[0].vin == vin) {
         error = "Another Vehicle with same (" + vin + ") FOUND!";
         return { error: error };
       } else _id = collection[0].vehicle[0]._id;

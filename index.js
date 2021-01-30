@@ -135,7 +135,7 @@ app.get(
 );
 //------------> Update vehicle
 app.put(
-  "/users/:email/vehicles/:vin",
+  "/users/:email/vehicles/:id",
   vehiclesController.putUpdateVehicleController
 );
 //------------> delete vehicle
