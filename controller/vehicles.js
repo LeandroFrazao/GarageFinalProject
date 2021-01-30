@@ -59,7 +59,7 @@ module.exports = () => {
     res.json({ vehicles: result });
   };
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////Update Vehicle "{PUT} /users/{email}/vehicle/{vin}"                       ///
+  ////Update Vehicle "{PUT} /users/{email}/vehicle/{id}"                       ///
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
   const putUpdateVehicleController = async (req, res) => {
     const email = req.params.email;
