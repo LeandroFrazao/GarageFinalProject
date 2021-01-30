@@ -207,7 +207,7 @@ module.exports = () => {
 
       const result = await db.update(
         COLLECTION,
-        { _id: ObjectID(id) },
+        { _id: ObjectID(_id) },
         newValue
       );
 
