@@ -19,22 +19,30 @@ module.exports = () => {
       let userEmail = auth.currentUser.userEmail;
       let userType = auth.currentUser.userType;
 
-      id = id.toLowerCase();
       //if userType is not admin, it's not possible to see other user accounts.
       if (userType !== "admin") {
         id = userEmail;
       }
-
+      const PIPELINE_EMAIL_VEHICLES = [
+        {
+          $lookup: {
+            from: "vehicles",
+            localField: "email",
+            foreignField: "email",
+            as: "vehicles",
+          },
+        },
+      ];
       // check if id is null or empty
       if (!id) {
-        users = await db.get(COLLECTION);
+        users = await db.aggregate("users", PIPELINE_EMAIL_VEHICLES);
+        console.log(users);
         if (users.length == 0) {
           error = "No Users Registered";
           return { error: error };
         }
       } else {
-        //const email = id.toLowerCase();
-
+        id = id.toLowerCase();
         const email = userEmail;
 
         if (ObjectID.isValid(id)) {
